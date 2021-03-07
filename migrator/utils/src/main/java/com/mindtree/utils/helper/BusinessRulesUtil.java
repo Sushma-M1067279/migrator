@@ -17,9 +17,10 @@ import org.slf4j.LoggerFactory;
 
 import com.amazonaws.services.s3.AmazonS3;
 import com.mindtree.models.dto.BrandMasterMappingDto;
+import com.mindtree.transformer.service.AppContext;
+import com.mindtree.transformer.service.MigratorServiceException;
 import com.mindtree.utils.constants.EnumUtil;
 import com.mindtree.utils.constants.MigratorConstants;
-import com.mindtree.utils.exception.MigratorServiceException;
 
 
 /**
@@ -33,27 +34,26 @@ public class BusinessRulesUtil {
 	static final Set<String> aemNameSpaces = new HashSet<String>();
 	public static final Map<String, String> colorLabelMap = new HashMap<String, String>();
 	static final Map<String, String> defaultMDDataTypeMap = new HashMap<String, String>();
-	static final Map<String, String> MimeTypeMap = new HashMap<String, String>();
+	public static final Map<String, String> MimeTypeMap = new HashMap<String, String>();
 	public static Set<String> assetsPathsSet = new HashSet<String>();
 	public static Set<String> absTargetPathsSet = new HashSet<String>();
-	private static AmazonS3 s3Client = (AmazonS3) MigrationUtils.getStorageClient();
 
 	private BusinessRulesUtil() {
 	}
 
 	static {
 		try {
-			Properties prop = MigrationUtils.getPropValues();
-			String masterBrandMappingFileName = MigrationUtils.getPropValues().getProperty("migrator.asset.masterBrandMappingFileName");
+			Properties prop = AppContext.getAppConfig();
+			String masterBrandMappingFileName = AppContext.getAppConfig().getProperty("migrator.asset.masterBrandMappingFileName");
 			String usageMappingSheetName = prop.getProperty(MigratorConstants.BRAND_USAGE_MAPPING_SHEETNAME);
 			String nameSpaceSheetName = prop.getProperty(MigratorConstants.AEM_NAME_SPACE_SHEETNAME);
 			String defaultMDSheetName = prop.getProperty(MigratorConstants.AEM_DEFAULT_METADATA_TYPE_SHEETNAME);
 			String mimeTypeSheetName = prop.getProperty(MigratorConstants.AEM_MIME_TYPE_SHEETNAME);
-			fillUsageMap(s3Client, masterBrandMappingFileName, usageMappingSheetName);
-			fillNameSpaceSet(s3Client, masterBrandMappingFileName, nameSpaceSheetName);
+			fillUsageMap(masterBrandMappingFileName, usageMappingSheetName);
+			fillNameSpaceSet( masterBrandMappingFileName, nameSpaceSheetName);
 			fillColorLabelMap();
-			fillDefaultMDDataTypeMap(s3Client, masterBrandMappingFileName, defaultMDSheetName);
-			loadMimeTypeMap(s3Client, masterBrandMappingFileName, mimeTypeSheetName);
+			fillDefaultMDDataTypeMap(masterBrandMappingFileName, defaultMDSheetName);
+			loadMimeTypeMap( masterBrandMappingFileName, mimeTypeSheetName);
 
 		} catch (MigratorServiceException e) {
 			LOGGER.error("BusinessRulesUtil : Static block : Unable to load usage mapping :{}", e);
@@ -61,11 +61,11 @@ public class BusinessRulesUtil {
 
 	}
 
-	private static void fillDefaultMDDataTypeMap(AmazonS3 s3Client, String masterBrandMappingFileName, String defaultMDSheetName)
+	private static void fillDefaultMDDataTypeMap(String masterBrandMappingFileName, String defaultMDSheetName)
 			throws MigratorServiceException {
 		XSSFSheet assetSheet = null;
-		String devMigrationConfigPath = MigrationUtils.getPropValues().getProperty(MigratorConstants.DEV_ASSET_MIG_CONFIG_PATH);
-		assetSheet = ReadExcel.getExcelSheet(s3Client, masterBrandMappingFileName, defaultMDSheetName, devMigrationConfigPath);
+		String devMigrationConfigPath = AppContext.getAppConfig().getProperty(MigratorConstants.DEV_ASSET_MIG_CONFIG_PATH);
+		assetSheet = ReadExcel.getExcelSheet(masterBrandMappingFileName, defaultMDSheetName, devMigrationConfigPath);
 		Iterator<Row> rowIterator = assetSheet.iterator();
 		while (rowIterator.hasNext()) {
 			Row currentRow = rowIterator.next();
@@ -88,11 +88,11 @@ public class BusinessRulesUtil {
 		}
 	}
 
-	private static void loadMimeTypeMap(AmazonS3 s3Client, String masterBrandMappingFileName, String sheetname)
+	private static void loadMimeTypeMap(String masterBrandMappingFileName, String sheetname)
 			throws MigratorServiceException {
 		XSSFSheet assetSheet = null;
-		String devMigrationConfigPath = MigrationUtils.getPropValues().getProperty(MigratorConstants.DEV_ASSET_MIG_CONFIG_PATH);
-		assetSheet = ReadExcel.getExcelSheet(s3Client, masterBrandMappingFileName, sheetname, devMigrationConfigPath);
+		String devMigrationConfigPath = AppContext.getAppConfig().getProperty(MigratorConstants.DEV_ASSET_MIG_CONFIG_PATH);
+		assetSheet = ReadExcel.getExcelSheet(masterBrandMappingFileName, sheetname, devMigrationConfigPath);
 		Iterator<Row> rowIterator = assetSheet.iterator();
 		while (rowIterator.hasNext()) {
 			Row currentRow = rowIterator.next();
@@ -124,11 +124,11 @@ public class BusinessRulesUtil {
 		colorLabelMap.put("7", "Yellow");
 	}
 
-	private static void fillNameSpaceSet(AmazonS3 s3Client, String masterBrandMappingFileName, String nameSpaceFileName)
+	private static void fillNameSpaceSet(String masterBrandMappingFileName, String nameSpaceFileName)
 			throws MigratorServiceException {
 		XSSFSheet assetSheet = null;
-		String devMigrationConfigPath = MigrationUtils.getPropValues().getProperty(MigratorConstants.DEV_ASSET_MIG_CONFIG_PATH);
-		assetSheet = ReadExcel.getExcelSheet(s3Client, masterBrandMappingFileName, nameSpaceFileName, devMigrationConfigPath);
+		String devMigrationConfigPath = AppContext.getAppConfig().getProperty(MigratorConstants.DEV_ASSET_MIG_CONFIG_PATH);
+		assetSheet = ReadExcel.getExcelSheet(masterBrandMappingFileName, nameSpaceFileName, devMigrationConfigPath);
 		Iterator<Row> rowIterator = assetSheet.iterator();
 		while (rowIterator.hasNext()) {
 			Row currentRow = rowIterator.next();
@@ -147,11 +147,11 @@ public class BusinessRulesUtil {
 		}
 	}
 
-	private static void fillUsageMap(AmazonS3 s3Client, String masterBrandMappingFileName, String usageMappingFileName)
+	private static void fillUsageMap(String masterBrandMappingFileName, String usageMappingFileName)
 			throws MigratorServiceException {
 		XSSFSheet assetSheet = null;
-		String devMigrationConfigPath = MigrationUtils.getPropValues().getProperty(MigratorConstants.DEV_ASSET_MIG_CONFIG_PATH);
-		assetSheet = ReadExcel.getExcelSheet(s3Client, masterBrandMappingFileName, usageMappingFileName, devMigrationConfigPath);
+		String devMigrationConfigPath = AppContext.getAppConfig().getProperty(MigratorConstants.DEV_ASSET_MIG_CONFIG_PATH);
+		assetSheet = ReadExcel.getExcelSheet(masterBrandMappingFileName, usageMappingFileName, devMigrationConfigPath);
 		Iterator<Row> rowIterator = assetSheet.iterator();
 		while (rowIterator.hasNext()) {
 			Row currentRow = rowIterator.next();
@@ -191,12 +191,12 @@ public class BusinessRulesUtil {
 		region = getMasterMDMapping(brandMasterMappingMap, region, exportFlowFlag);
 		country = getMasterMDMapping(brandMasterMappingMap, country, exportFlowFlag);
 		if (foldersList.contains("bluenoid Global")) {
-			excelMDMap.put(region, MigrationUtils.encode("APAC - Asia and Pacific"));
-			excelMDMap.put(country, MigrationUtils.encode("Japan"));
+			excelMDMap.put(region, MigrationUtil.encode("APAC - Asia and Pacific"));
+			excelMDMap.put(country, MigrationUtil.encode("Japan"));
 		} else if (foldersList.contains("bluenoid Local")) {
-			excelMDMap.put(region, MigrationUtils.encode("Global"));
+			excelMDMap.put(region, MigrationUtil.encode("Global"));
 		} else if (foldersList.contains(MigratorConstants.TRAVEL_RETAIL_STRING)) {
-			excelMDMap.put(region, MigrationUtils.encode(MigratorConstants.TRAVEL_RETAIL_STRING));
+			excelMDMap.put(region, MigrationUtil.encode(MigratorConstants.TRAVEL_RETAIL_STRING));
 		}
 	}
 
@@ -236,7 +236,7 @@ public class BusinessRulesUtil {
 		}
 
 		if (null != usageValue) {
-			excelMDMap.put(usage, MigrationUtils.encode(usageValue));
+			excelMDMap.put(usage, MigrationUtil.encode(usageValue));
 		}
 	}
 
@@ -261,7 +261,7 @@ public class BusinessRulesUtil {
 		assetType = getMasterMDMapping(brandMasterMappingMap, assetType, exportFlowFlag);
 		String usage = MigratorConstants.USAGE;
 		usage = getMasterMDMapping(brandMasterMappingMap, usage, exportFlowFlag);
-		excelMDMap.put(assetType, MigrationUtils.encode("Layout Digital"));
+		excelMDMap.put(assetType, MigrationUtil.encode("Layout Digital"));
 		String[] futurePath = path.split("Social");
 		if (futurePath != null && futurePath.length > 1) {
 			String splitRegex = Pattern.quote(System.getProperty("file.separator"));
@@ -269,7 +269,7 @@ public class BusinessRulesUtil {
 			if (subPath != null && subPath.length > 1) {
 				String social = subPath[1];
 				if (EnumUtil.contains(EnumUtil.SOCIAL.class, social.trim().toUpperCase())) {
-					excelMDMap.put(usage, MigrationUtils.encode("Social - " + social.trim()));
+					excelMDMap.put(usage, MigrationUtil.encode("Social - " + social.trim()));
 				}
 			}
 		}
@@ -284,14 +284,14 @@ public class BusinessRulesUtil {
 		String productName = "headline";
 		productName = getMasterMDMapping(brandMasterMappingMap, productName, exportFlowFlag);
 
-		excelMDMap.put(assetType, MigrationUtils.encode("Layout Print"));
+		excelMDMap.put(assetType, MigrationUtil.encode("Layout Print"));
 		String[] futurePath = path.split("FY");
 		getFuturePath(excelMDMap, productName, futurePath);
 		if (!usageMap.isEmpty()) {
 			for (Map.Entry<String, String> usageKeyword : usageMap.entrySet()) {
 				if (path.contains(usageKeyword.getKey())) {
 					if (usageKeyword.getValue() != null && !usageKeyword.getValue().isEmpty()) {
-						excelMDMap.put(usage, MigrationUtils
+						excelMDMap.put(usage, MigrationUtil
 								.encode(usageKeyword.getValue().replaceAll(", ", MigratorConstants.SPECIAL_CHARACTER_PIPE)));
 					}
 
@@ -308,7 +308,7 @@ public class BusinessRulesUtil {
 				String programName = subPath[1];
 				LOGGER.info("BusinessRulesUtil applyProgramFolderRules : programName :", programName);
 				if (!programName.isEmpty()) {
-					excelMDMap.put(productName, MigrationUtils.encode(programName));
+					excelMDMap.put(productName, MigrationUtil.encode(programName));
 
 				}
 			}

@@ -19,10 +19,11 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.amazonaws.services.s3.AmazonS3;
+import com.mindtree.transformer.service.AppContext;
+import com.mindtree.transformer.service.MigratorServiceException;
 import com.mindtree.utils.constants.MigratorConstants;
-import com.mindtree.utils.exception.MigratorServiceException;
 import com.mindtree.utils.helper.BusinessRulesUtil;
-import com.mindtree.utils.helper.MigrationUtils;
+import com.mindtree.utils.helper.MigrationUtil;
 import com.mindtree.utils.helper.ReadExcel;
 
 /**
@@ -44,8 +45,6 @@ public class BluenoidReqConfigurationLoader {
 
 	public static String filePath = null;
 	
-	private static AmazonS3 s3Client = (AmazonS3) MigrationUtils.getStorageClient();
-
 	/**
 	 * Default Constructor
 	 */
@@ -58,9 +57,9 @@ public class BluenoidReqConfigurationLoader {
 		try {
 
 			LOGGER.info("BluenoidReqConfigurationLoader : Loading static contents : Start..................");
-			prop = MigrationUtils.getPropValues();
+			prop = AppContext.getAppConfig();
 			brandAbbreviation ="BN";
-			StringBuilder brandPrefix = MigrationUtils.prepareBrandPrefix(brandAbbreviation);
+			StringBuilder brandPrefix = MigrationUtil.prepareBrandPrefix(brandAbbreviation);
 			String brandConfigFile = prop.getProperty(brandPrefix + ""
 					+ MigratorConstants.BRAND_REQ_CONFIGURATION_FILENAME);
 			String folderMappingSheet = prop.getProperty(brandPrefix.toString().concat("")
@@ -128,8 +127,8 @@ public class BluenoidReqConfigurationLoader {
 			throws MigratorServiceException {
 		XSSFSheet assetSheet = null;
 		DataFormatter formatter = new DataFormatter();
-		String devMigrationConfigPath = MigrationUtils.getPropValues().getProperty(MigratorConstants.DEV_ASSET_MIG_CONFIG_PATH);
-		assetSheet = ReadExcel.getExcelSheet(s3Client, reqConfigFilename, sheetname,
+		String devMigrationConfigPath = AppContext.getAppConfig().getProperty(MigratorConstants.DEV_ASSET_MIG_CONFIG_PATH);
+		assetSheet = ReadExcel.getExcelSheet(reqConfigFilename, sheetname,
 				devMigrationConfigPath.concat("/").concat(brandAbbreviation));
 		Iterator<Row> rowIterator = assetSheet.iterator();
 		while (rowIterator.hasNext()) {
@@ -167,8 +166,8 @@ public class BluenoidReqConfigurationLoader {
 			throws MigratorServiceException {
 		XSSFSheet assetSheet = null;
 
-		String devMigrationConfigPath = MigrationUtils.getPropValues().getProperty(MigratorConstants.DEV_ASSET_MIG_CONFIG_PATH);
-		assetSheet = ReadExcel.getExcelSheet( s3Client, reqConfigFilename, sheetname,
+		String devMigrationConfigPath = AppContext.getAppConfig().getProperty(MigratorConstants.DEV_ASSET_MIG_CONFIG_PATH);
+		assetSheet = ReadExcel.getExcelSheet(reqConfigFilename, sheetname,
 				devMigrationConfigPath.concat("/").concat(brandAbbreviation));
 		Iterator<Row> rowIterator = assetSheet.iterator();
 		while (rowIterator.hasNext()) {
@@ -199,8 +198,8 @@ public class BluenoidReqConfigurationLoader {
 
 		DataFormatter formatter = new DataFormatter();
 		Map<String, Integer> headers = new HashMap<String, Integer>();
-		String devMigrationConfigPath = MigrationUtils.getPropValues().getProperty(MigratorConstants.DEV_ASSET_MIG_CONFIG_PATH);
-		assetSheet = ReadExcel.getExcelSheet(s3Client, reqConfigFilename, sheetname,
+		String devMigrationConfigPath = AppContext.getAppConfig().getProperty(MigratorConstants.DEV_ASSET_MIG_CONFIG_PATH);
+		assetSheet = ReadExcel.getExcelSheet(reqConfigFilename, sheetname,
 				devMigrationConfigPath.concat("/").concat(brandAbbreviation));
 
 		/**
@@ -266,8 +265,8 @@ public class BluenoidReqConfigurationLoader {
 		XSSFSheet assetSheet = null;
 
 		Map<String, Integer> headersMap = new HashMap<String, Integer>();
-		String devMigrationConfigPath = MigrationUtils.getPropValues().getProperty(MigratorConstants.DEV_ASSET_MIG_CONFIG_PATH);
-		assetSheet = ReadExcel.getExcelSheet(s3Client, reqConfigFilename, sheetname,
+		String devMigrationConfigPath = AppContext.getAppConfig().getProperty(MigratorConstants.DEV_ASSET_MIG_CONFIG_PATH);
+		assetSheet = ReadExcel.getExcelSheet(reqConfigFilename, sheetname,
 				devMigrationConfigPath.concat("/").concat(brandAbbreviation));
 
 		FileInputStream file;
@@ -317,8 +316,8 @@ public class BluenoidReqConfigurationLoader {
 	private static void loadProgramFolderPathList(String reqConfigFilename, String sheetname)
 			throws MigratorServiceException {
 		XSSFSheet assetSheet = null;
-		String devMigrationConfigPath = MigrationUtils.getPropValues().getProperty(MigratorConstants.DEV_ASSET_MIG_CONFIG_PATH);
-		assetSheet = ReadExcel.getExcelSheet(s3Client, reqConfigFilename, sheetname,
+		String devMigrationConfigPath = AppContext.getAppConfig().getProperty(MigratorConstants.DEV_ASSET_MIG_CONFIG_PATH);
+		assetSheet = ReadExcel.getExcelSheet(reqConfigFilename, sheetname,
 				devMigrationConfigPath.concat("/").concat(brandAbbreviation));
 		Iterator<Row> rowIterator = assetSheet.iterator();
 		while (rowIterator.hasNext()) {
@@ -345,8 +344,8 @@ public class BluenoidReqConfigurationLoader {
 	private static void loadDuplicatePathList(String reqConfigFilename, String sheetname)
 			throws MigratorServiceException {
 		XSSFSheet assetSheet = null;
-		String devMigrationConfigPath = MigrationUtils.getPropValues().getProperty(MigratorConstants.DEV_ASSET_MIG_CONFIG_PATH);
-		assetSheet = ReadExcel.getExcelSheet(s3Client, reqConfigFilename, sheetname,
+		String devMigrationConfigPath = AppContext.getAppConfig().getProperty(MigratorConstants.DEV_ASSET_MIG_CONFIG_PATH);
+		assetSheet = ReadExcel.getExcelSheet(reqConfigFilename, sheetname,
 				devMigrationConfigPath.concat("/").concat(brandAbbreviation));
 		Iterator<Row> rowIterator = assetSheet.iterator();
 		while (rowIterator.hasNext()) {

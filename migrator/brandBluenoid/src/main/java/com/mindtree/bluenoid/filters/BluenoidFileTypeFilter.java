@@ -4,9 +4,10 @@ import java.util.Properties;
 
 import com.mindtree.bluenoid.util.FilterUtil;
 import com.mindtree.models.vo.ExtensionFilterVO;
+import com.mindtree.transformer.service.AppContext;
+import com.mindtree.transformer.service.MigratorServiceException;
 import com.mindtree.utils.constants.MigratorConstants;
-import com.mindtree.utils.exception.MigratorServiceException;
-import com.mindtree.utils.helper.MigrationUtils;
+import com.mindtree.utils.helper.MigrationUtil;
 import com.mindtree.utils.service.AbstractFilter;
 
 public class BluenoidFileTypeFilter extends AbstractFilter {
@@ -21,18 +22,14 @@ public class BluenoidFileTypeFilter extends AbstractFilter {
 		boolean eligibleToMigrate = false;
 		String assetPath = filterVO.s3Asset.getKey().trim();
 		Properties prop = null;
-		try {
-			prop = MigrationUtils.getPropValues();
-		} catch (MigratorServiceException e) {
-			e.printStackTrace();
-		}
+		prop = AppContext.getAppConfig();
 		Long assetSize = filterVO.s3Asset.getValue();
-		String fileExtension = MigrationUtils.getFileExtension(assetPath);
+		String fileExtension = MigrationUtil.getFileExtension(assetPath);
 		String extensionFilterFlag = prop.getProperty(filterVO.brandPrefix + ""
 				+ MigratorConstants.FILTER_ASSET_BY_EXTENSIONS);
 		String blankAssetFilterFlag = prop.getProperty(filterVO.brandPrefix + ""
 				+ MigratorConstants.FILTER_BLANK_ASSET_LESS_THAN_1MB);
-		fileExtension = MigrationUtils.getFileExtension(assetPath);
+		fileExtension = MigrationUtil.getFileExtension(assetPath);
 		if (fileExtension != null && !fileExtension.isEmpty()) {
 			if (extensionFilterFlag != null && extensionFilterFlag.equalsIgnoreCase(MigratorConstants.ON)) {
 				eligibleToMigrate = FilterUtil.filterAssetsByToBeMigratedFileTypes(assetPath, assetSize, fileExtension,

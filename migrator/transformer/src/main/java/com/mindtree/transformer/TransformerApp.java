@@ -7,11 +7,11 @@ import org.slf4j.LoggerFactory;
 
 import com.mindtree.transformer.factory.ApplicationFactory;
 import com.mindtree.transformer.service.AbstractTransformer;
+import com.mindtree.transformer.service.AppContext;
 import com.mindtree.transformer.service.IStorage;
 import com.mindtree.transformer.service.ITransformer;
-import com.mindtree.utils.exception.MigratorServiceException;
-import com.mindtree.utils.helper.MigrationUtils;
-import com.mindtree.utils.helper.MigrationUtils.AppVariables;
+import com.mindtree.transformer.service.MigratorServiceException;
+import com.mindtree.transformer.service.AppContext.AppVariables;
 
 public class TransformerApp {
 	
@@ -21,12 +21,12 @@ public class TransformerApp {
 	private IStorage appStorage;
 	
 	public boolean init() {
-		initSuccess = MigrationUtils.initializeConfig();
+		initSuccess = AppContext.initializeConfig();
 		if (!initSuccess) {
 			LOGGER.error("TransformerApp : init : Errors while initializing application.");
 			return false;
 		}
-		appVariables = MigrationUtils.getAppVariables();
+		appVariables = AppContext.getAppVariables();
 		appStorage = ApplicationFactory.getStorage(appVariables.storageType);
 		
 		try {
@@ -34,8 +34,8 @@ public class TransformerApp {
 			Properties props = appStorage.loadProperties();
 			if (props == null) {throw new MigratorServiceException("");}
 			
-			MigrationUtils.setProp(props);
-			MigrationUtils.setStorageClient(appStorage.getNativeClient());
+			AppContext.setAppConfig(props);
+			AppContext.setStorage(appStorage);
 			
 		} catch (MigratorServiceException e) {
 			LOGGER.error("TransformerApp : init : Errors while initializing application.");

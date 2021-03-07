@@ -6,9 +6,9 @@ import java.util.Properties;
 import com.mindtree.bluenoid.config.BluenoidReqConfigurationLoader;
 import com.mindtree.bluenoid.util.FilterUtil;
 import com.mindtree.models.vo.ExtensionFilterVO;
+import com.mindtree.transformer.service.AppContext;
+import com.mindtree.transformer.service.MigratorServiceException;
 import com.mindtree.utils.constants.MigratorConstants;
-import com.mindtree.utils.exception.MigratorServiceException;
-import com.mindtree.utils.helper.MigrationUtils;
 import com.mindtree.utils.helper.S3Utility;
 import com.mindtree.utils.service.AbstractFilter;
 
@@ -32,11 +32,7 @@ public class BluenoidExtensionBasedFilter extends AbstractFilter {
 		 */
 		boolean eligibleToMigrate = true;
 		Properties prop = null;
-		try {
-			prop = MigrationUtils.getPropValues();
-		} catch (MigratorServiceException e) {
-			e.printStackTrace();
-		}
+		prop = AppContext.getAppConfig();
 		String sourceAssetPath = filterVO.s3Asset.getKey().trim();
 		Long assetSize = filterVO.s3Asset.getValue();
 		String applyCustomExtensionsFlag = prop.getProperty(filterVO.brandPrefix + ""

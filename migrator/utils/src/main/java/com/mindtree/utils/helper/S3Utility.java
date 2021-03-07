@@ -11,7 +11,7 @@ import com.amazonaws.services.s3.AmazonS3;
 import com.amazonaws.services.s3.model.ListObjectsRequest;
 import com.amazonaws.services.s3.model.ObjectListing;
 import com.amazonaws.services.s3.model.S3ObjectSummary;
-import com.mindtree.utils.exception.MigratorServiceException;
+import com.mindtree.transformer.service.MigratorServiceException;
 
 /**
  * @author M1032046
@@ -31,7 +31,7 @@ public class S3Utility {
 //
 //		LOGGER_UTIL.info("S3Utility : getFileSizeFromS3 : Getting Assets from S3 : bucketName :{} Folder key:{}",
 //				bucketName, folderKey);
-//		s3 = MigrationUtils.getAmazonS3Instance();
+//		s3 = AppContext.getAmazonS3Instance();
 //
 //		ListObjectsRequest listObjectsRequest = null;
 //		if (folderKey != null && !folderKey.isEmpty()) {

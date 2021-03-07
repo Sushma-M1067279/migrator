@@ -15,14 +15,15 @@ import com.amazonaws.services.s3.AmazonS3;
 import com.mindtree.models.dto.BrandMasterMappingDto;
 import com.mindtree.transformer.factory.MigratorBusinessFactory;
 import com.mindtree.transformer.service.AbstractTransformer;
+import com.mindtree.transformer.service.AppContext;
 import com.mindtree.transformer.service.ITransformer;
+import com.mindtree.transformer.service.MigratorServiceException;
 import com.mindtree.utils.business.IMigratorBusiness;
 import com.mindtree.utils.constants.MigratorConstants;
-import com.mindtree.utils.exception.MigratorServiceException;
 import com.mindtree.utils.helper.BusinessRulesUtil;
 import com.mindtree.utils.helper.MasterMetadataMapReader;
 import com.mindtree.utils.helper.MigrationReportUtil;
-import com.mindtree.utils.helper.MigrationUtils;
+import com.mindtree.utils.helper.MigrationUtil;
 import com.mindtree.utils.helper.S3Utility;
 
 /**
@@ -64,30 +65,30 @@ public class DriveBasedTransformer extends AbstractTransformer {
 		boolean isSuccess = false;
 		try {
 
-			StringBuilder brandPrefix = MigrationUtils.prepareBrandPrefix(brandAbbreviation);
+			StringBuilder brandPrefix = MigrationUtil.prepareBrandPrefix(brandAbbreviation);
 			LOGGER.info("DriveBasedTransformer transform : brandPrefix:{}", brandPrefix);
 
-			Properties prop = MigrationUtils.getPropValues();
+			Properties prop = AppContext.getAppConfig();
 			/**
 			 * Read brand specific properties.
 			 */
 			brand = prop.getProperty(brandPrefix+ MigratorConstants.BRAND);
-			String masterBrandMappingFileName = MigrationUtils.getPropValues().getProperty("migrator.asset.masterBrandMappingFileName");
-			String mastetToBrandMappingSheetName = MigrationUtils.getPropValues().getProperty("migrator.asset.mastetToBrandMappingSheetName");
+			String masterBrandMappingFileName = AppContext.getAppConfig().getProperty("migrator.asset.masterBrandMappingFileName");
+			String mastetToBrandMappingSheetName = AppContext.getAppConfig().getProperty("migrator.asset.mastetToBrandMappingSheetName");
 			
 			LOGGER.info("DriveBasedTransformer transform : brandPrefix:{}", brandPrefix);
 			LOGGER.info("DriveBasedTransformer transform : prop size:{}", prop.size());
-			String s3BucketName = prop.getProperty(brandPrefix + MigratorConstants.S3_SOURCE_BUCKET_NAME);
-			String s3Folder = prop.getProperty(brandPrefix + MigratorConstants.S3_SOURCE_BUCKET_FOLDER);
+//			String s3BucketName = prop.getProperty(brandPrefix + MigratorConstants.S3_SOURCE_BUCKET_NAME);
+			String srcFolder = prop.getProperty(brandPrefix + MigratorConstants.S3_SOURCE_BUCKET_FOLDER);
 
-			Map<String, Long> fileSizes = storage.getFileSizes(s3BucketName, s3Folder);
-			LOGGER.info("DriveBasedTransformer transform : s3Assets size::{}", fileSizes.size());
+			Map<String, Long> fileSizes = storage.getFileSizes(srcFolder);
+			LOGGER.info("DriveBasedTransformer transform : Assets size::{}", fileSizes.size());
 			BusinessRulesUtil.assetsPathsSet.addAll(fileSizes.keySet());
 
 			IMigratorBusiness migratorBusiness = MigratorBusinessFactory.getMigratorBusiness(this.brand);
 
 			Map<String, BrandMasterMappingDto> masterMetadataMap = MasterMetadataMapReader.getBrandMasterMapping(
-					(AmazonS3)storage.getNativeClient(), masterBrandMappingFileName, mastetToBrandMappingSheetName, brandAbbreviation);
+					masterBrandMappingFileName, mastetToBrandMappingSheetName, brandAbbreviation);
 			int skippedFileCount = 0;
 			int count = 0;
 
@@ -99,7 +100,7 @@ public class DriveBasedTransformer extends AbstractTransformer {
 			for (Map.Entry<String, Long> s3Asset : fileSizes.entrySet()) {
 				LOGGER.info("Processing : "+s3Asset.getKey());
 				if (!s3Asset.getKey().trim().startsWith(MigratorConstants.IGNORE_FOLDER_SPECIALTY_MULTI_CHANNEL)) {
-					String migrationAssetId = MigrationUtils.generateAssetId(brand, instanceNumber, ++assetCounter);
+					String migrationAssetId = MigrationUtil.generateAssetId(brand, instanceNumber, ++assetCounter);
 					Thread.currentThread().setName(migrationAssetId);
 					outputMap = migratorBusiness.applyBrandSpecificRules(masterMetadataMap, s3Asset, brand,
 							brandPrefix.toString());
@@ -145,15 +146,10 @@ public class DriveBasedTransformer extends AbstractTransformer {
 					nonMigratedAssetsMap.size());
 			LOGGER.info("DriveBasedTransformer transform : migrationAssetsList size::{}",
 					assetMetadataMapList.size());
-			LOGGER.info("DriveBasedTransformer transform : migrationAssetsList size::{}",
-					assetMetadataMapList.size());
-			LOGGER.info("migratedAssetsMap size:", migratedAssetsMap.size());
-			LOGGER.info("nonMigratedAssetsMap size:", nonMigratedAssetsMap.size());
-			LOGGER.info("missingAssets size:", missingAssets.size());
-			LOGGER.info("missingAssets :", missingAssets);
+
 			LOGGER.info("--------------------- DriveBasedTransformer transform : Summary ---------------------------");
-			MigrationReportUtil.logMigrationSummaryReport((AmazonS3) storage.getNativeClient(), brandPrefix, migratedAssetsMap, nonMigratedAssetsMap);
-			isSuccess = MigrationReportUtil.generateOutputAndReplicateAssets((AmazonS3) storage.getNativeClient(), brandPrefix, finalHeadersSet, assetMetadataMapList);
+			MigrationReportUtil.logMigrationSummaryReport( brandPrefix, migratedAssetsMap, nonMigratedAssetsMap);
+			isSuccess = MigrationReportUtil.generateOutputAndReplicateAssets(brandPrefix, finalHeadersSet, assetMetadataMapList);
 		} catch (MigratorServiceException e) {
 			LOGGER.error("DriveBasedTransformer transform :: ElcServiceException :{}", e);
 			return false;

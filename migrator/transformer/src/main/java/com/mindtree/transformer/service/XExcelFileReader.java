@@ -25,9 +25,7 @@ import org.xml.sax.SAXException;
 
 import com.amazonaws.services.s3.AmazonS3;
 import com.mindtree.utils.constants.MigratorConstants;
-import com.mindtree.utils.exception.MigratorServiceException;
 import com.mindtree.utils.helper.MigrationReportUtil;
-import com.mindtree.utils.helper.MigrationUtils;
 
 /**
  * 
@@ -49,7 +47,6 @@ public class XExcelFileReader implements IDataFileReader {
 	private OPCPackage opcPkg;
 	private ReadOnlySharedStringsTable stringsTable;
 	private XMLStreamReader xmlReader;
-	private IStorage storage;
 
 	static final Logger LOGGER = LoggerFactory.getLogger(XExcelFileReader.class);
 
@@ -61,17 +58,17 @@ public class XExcelFileReader implements IDataFileReader {
 	 * @param brandAbbreviation 
 	 * @throws MigratorServiceException
 	 */
-	public XExcelFileReader(IStorage storage, String excelPath, int sheetIndex, String brandAbbreviation) throws MigratorServiceException {
+	public XExcelFileReader(String excelPath, int sheetIndex, String brandAbbreviation) throws MigratorServiceException {
 		try {
 
 			LOGGER.info("XExcelFileReader : Reading file from S3:{}", excelPath);
-			String devMigrationConfigPath = MigrationUtils.getPropValues().getProperty(
+			String devMigrationConfigPath = AppContext.getAppConfig().getProperty(
 					MigratorConstants.DEV_ASSET_MIG_CONFIG_PATH);
-			File localFile = MigrationReportUtil.getFileFromS3((AmazonS3)storage.getNativeClient(), excelPath, devMigrationConfigPath+"/"+brandAbbreviation);
+			File localFile = AppContext.getStorage().getFile(
+					devMigrationConfigPath+ AppContext.getStorage().fileSeparator() +brandAbbreviation, excelPath);
 			opcPkg = OPCPackage.open(localFile.getAbsolutePath(), PackageAccess.READ);
 
 			// opcPkg = OPCPackage.open(excelPath, PackageAccess.READ);
-			this.storage = storage;
 			this.stringsTable = new ReadOnlySharedStringsTable(opcPkg);
 
 			XSSFReader xssfReader = new XSSFReader(opcPkg);

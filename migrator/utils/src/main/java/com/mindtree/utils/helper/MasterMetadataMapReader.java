@@ -13,8 +13,9 @@ import org.slf4j.LoggerFactory;
 
 import com.amazonaws.services.s3.AmazonS3;
 import com.mindtree.models.dto.BrandMasterMappingDto;
+import com.mindtree.transformer.service.AppContext;
+import com.mindtree.transformer.service.MigratorServiceException;
 import com.mindtree.utils.constants.MigratorConstants;
-import com.mindtree.utils.exception.MigratorServiceException;
 
 /**
  * Reads master metadata mapping sheet
@@ -38,16 +39,16 @@ public class MasterMetadataMapReader {
 	 * @param brand
 	 * @return
 	 */
-	public static Map<String, BrandMasterMappingDto> getBrandMasterMapping(AmazonS3 s3Client, String fileName, String sheetName,
+	public static Map<String, BrandMasterMappingDto> getBrandMasterMapping(String fileName, String sheetName,
 			String brand) {
 
 		Map<String, Integer> headers = new HashMap<String, Integer>();
 
 		XSSFSheet assetSheet = null;
 		try {
-			String devMigrationConfigPath = MigrationUtils.getPropValues().getProperty(MigratorConstants.DEV_ASSET_MIG_CONFIG_PATH);
+			String devMigrationConfigPath = AppContext.getAppConfig().getProperty(MigratorConstants.DEV_ASSET_MIG_CONFIG_PATH);
 			// Read master metadata mapping from S3
-			assetSheet = ReadExcel.getExcelSheet(s3Client, fileName, sheetName, devMigrationConfigPath);
+			assetSheet = ReadExcel.getExcelSheet(fileName, sheetName, devMigrationConfigPath);
 			LOGGER.info("sheet: "+ assetSheet.getSheetName());
 
 			// get headers only

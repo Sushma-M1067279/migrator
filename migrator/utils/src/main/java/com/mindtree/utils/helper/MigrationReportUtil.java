@@ -55,8 +55,10 @@ import com.amazonaws.services.s3.model.PutObjectRequest;
 import com.amazonaws.services.s3.model.PutObjectResult;
 import com.amazonaws.services.s3.model.S3Object;
 import com.amazonaws.services.s3.model.S3ObjectInputStream;
+import com.mindtree.transformer.service.AppContext;
+import com.mindtree.transformer.service.IStorage;
+import com.mindtree.transformer.service.MigratorServiceException;
 import com.mindtree.utils.constants.MigratorConstants;
-import com.mindtree.utils.exception.MigratorServiceException;
 
 /**
  * @author M1032046
@@ -109,7 +111,7 @@ public class MigrationReportUtil {
 	 * @param finalAssetMetadataMapList
 	 * @param finalAssetMetadataMapKeySet
 	 */
-	public static boolean generateOutputAndReplicateAssets(AmazonS3 s3Client, StringBuilder brandPrefix,
+	public static boolean generateOutputAndReplicateAssets( StringBuilder brandPrefix,
 			Set<String> finalAssetMetadataMapKeySet, List<Map<String, String>> finalAssetMetadataMapList) {
 		boolean isSuccess = false;
 		XSSFWorkbook workbook = null;
@@ -118,7 +120,7 @@ public class MigrationReportUtil {
 			/**
 			 * Read brand specific properties.
 			 */
-			Properties prop = MigrationUtils.getPropValues();
+			Properties prop = AppContext.getAppConfig();
 
 			String migrationCSVReportName = prop.getProperty(brandPrefix + ""
 					+ MigratorConstants.MIGRATION_CSV_REPORT_PATH);
@@ -296,31 +298,33 @@ public class MigrationReportUtil {
 					 * Create new rows for rendition files.
 					 */
 
-					rownum = writeRenditionsToCSV(s3Client,brandPrefix, renditionsTargetPath, migrationSheet, headersMap,
+					rownum = writeRenditionsToCSV(brandPrefix, renditionsTargetPath, migrationSheet, headersMap,
 							rownum, assetTargetPath, assetId, renditions, s3ReplicationFlag);
 
 					/**
 					 * Replicate AEM target path in S3 for S3 ingestor tool for
 					 * real asset.
 					 */
+					IStorage storage = AppContext.getStorage();
+
 					if (s3ReplicationFlag.equalsIgnoreCase("true")) {
 						if (migrationType != null && migrationType.equalsIgnoreCase(MigratorConstants.AGENCY)) {
 							LOGGER.info("Agency : assetRelativePath :" + assetRelativePath + " | assetTargetPath: "
 									+ assetTargetPath);
-							replicateS3AsAEM(s3Client, brandPrefix, assetRelativePath, assetTargetPath);
+							storage.replicateAsAEM(brandPrefix.toString(), assetRelativePath, assetTargetPath);
 						} else {
 							LOGGER.info("NonAgency : assetFileName :" + assetFileName + " | assetTargetPath: "
 									+ assetTargetPath);
-							replicateS3AsAEM(s3Client, brandPrefix, assetFileName, assetTargetPath);
+							storage.replicateAsAEM(brandPrefix.toString(), assetFileName, assetTargetPath);
 						}
 					}
 				}
 
 				preparePathFolderCreatorFile(pathsMap, assetPathSheet);
-				createAndUploadFile(s3Client, folderCreatorWorkbook, migrationFolderCreatorReportPath);
+				createAndUploadFile(folderCreatorWorkbook, migrationFolderCreatorReportPath);
 			}
 
-			createAndUploadFile(s3Client, workbook, migrationCSVReportName);
+			createAndUploadFile( workbook, migrationCSVReportName);
 
 			LOGGER.info("Migration completed succesfully!!!!!!! Congratulations!!!!!!!!");
 			isSuccess = true;
@@ -346,7 +350,7 @@ public class MigrationReportUtil {
 		return isSuccess;
 	}
 
-	public static void createAndUploadFile(AmazonS3 s3Client, XSSFWorkbook workbook, String migrationCSVReportName)
+	public static void createAndUploadFile(XSSFWorkbook workbook, String migrationCSVReportName)
 			throws FileNotFoundException, IOException, MigratorServiceException {
 		// String configPath = getConfigPath();
 		if (null != workbook) {
@@ -357,7 +361,7 @@ public class MigrationReportUtil {
 			out.close();
 			LOGGER.info("asset_migration.xlsx written successfully on disk.");
 
-			uploadFileToS3(s3Client, file, migrationCSVReportName);
+			uploadFileToStorage(file, migrationCSVReportName);
 
 		}
 	}
@@ -375,7 +379,7 @@ public class MigrationReportUtil {
 				path = oldNewPaths[0];
 			}
 
-			String[] folders = path.split("\\/");
+			String[] folders = path.split("\\"+AppContext.getStorage().fileSeparator());
 			Map<String, String> folderMap = assetPath.getValue();
 			if (folders.length > 0) {
 				updateFolderCell(assetMDRow, folderMap, folders);
@@ -402,12 +406,13 @@ public class MigrationReportUtil {
 
 	public static String preparePathForFolderCreator(String path, Map<String, Map<String, String>> pathsMap) {
 		Pattern pt = Pattern.compile("[^a-zA-Z0-9._/\\p{L}]");
+		String sep = ""+AppContext.getStorage().fileSeparator();
 
-		String fileName = path.substring(path.lastIndexOf('/') + 1, path.length()).trim();
+		String fileName = AppContext.getStorage().getFileName(path);
 		String updatedFileName = replaceSpecialCharacters(pt, fileName, MigratorConstants.FILE_NAME);
 
-		path = path.substring(0, path.lastIndexOf('/'));
-		String[] folders = path.split("\\/");
+		path = path.substring(0, path.lastIndexOf(sep));
+		String[] folders = path.split("\\"+sep);
 		Map<String, String> folderMap = new HashMap<>();
 
 		StringBuilder mapKey = new StringBuilder(path);
@@ -421,7 +426,7 @@ public class MigrationReportUtil {
 					String updatedFolderName = replaceSpecialCharacters(pt, originalFolderName,
 							MigratorConstants.FOLDER);
 
-					modifiedPath.append(updatedFolderName).append("/");
+					modifiedPath.append(updatedFolderName).append("/"); // separator is for AEM
 
 					folderMap.put(originalFolderName, updatedFolderName);
 				}
@@ -505,7 +510,7 @@ public class MigrationReportUtil {
 		return targetPath;
 	}
 
-	private static int writeRenditionsToCSV(AmazonS3 s3Client,StringBuilder brandPrefix, String renditionsTargetPath,
+	private static int writeRenditionsToCSV(StringBuilder brandPrefix, String renditionsTargetPath,
 			XSSFSheet migrationSheet, Map<String, Integer> headersMap, int rownum, String assetTargetPath,
 			String assetId, String[] renditions, String s3ReplicationFlag) {
 
@@ -535,7 +540,8 @@ public class MigrationReportUtil {
 				 * rendition files.
 				 */
 				if (s3ReplicationFlag.equalsIgnoreCase("true")) {
-					replicateS3AsAEM(s3Client, brandPrefix, rendition, renditionsTargetPath.concat(renditionsTempPath));
+					IStorage storage = AppContext.getStorage();
+					storage.replicateAsAEM(brandPrefix.toString(), rendition, renditionsTargetPath.concat(renditionsTempPath));
 				}
 			}
 		}
@@ -587,7 +593,7 @@ public class MigrationReportUtil {
 	 * @param nonMigratedAssetsMap
 	 * @param migratedAssetsMap
 	 */
-	public static void createSummaryReport(AmazonS3 s3Client, StringBuilder brandPrefix, Map<String, String> migratedAssetsMap,
+	public static void createSummaryReport( StringBuilder brandPrefix, Map<String, String> migratedAssetsMap,
 			Map<String, String> nonMigratedAssetsMap) {
 
 		/**
@@ -596,7 +602,7 @@ public class MigrationReportUtil {
 		Properties prop;
 		XSSFWorkbook workbook = null;
 		try {
-			prop = MigrationUtils.getPropValues();
+			prop = AppContext.getAppConfig();
 			String migrationSummaryReportName = prop.getProperty(brandPrefix + ""
 					+ MigratorConstants.MIGRATION_SUMMARY_REPORT_PATH);
 			// Blank workbook
@@ -680,7 +686,7 @@ public class MigrationReportUtil {
 				out.close();
 				LOGGER.info("migration_summary.xlsx written successfully on disk.");
 
-				uploadFileToS3(s3Client, file, migrationSummaryReportName);
+				uploadFileToStorage( file, migrationSummaryReportName);
 			}
 
 		} catch (Exception e) {
@@ -696,43 +702,14 @@ public class MigrationReportUtil {
 		}
 	}
 
-	public static void uploadFileToS3(AmazonS3 s3Client, File file, String migrationCSVReportName) throws MigratorServiceException {
+	public static void uploadFileToStorage( File file, String migrationCSVReportName) throws MigratorServiceException {
 		// String path = getConfigPath();
 
-		Format formatter = new SimpleDateFormat("yyyy-MM-dd_hh-mm-ss");
-		String dateString = formatter.format(new Date());
-
-		String devMigrationBucketName = MigrationUtils.getPropValues().getProperty(
-				"migrator.dev.asset.migration.bucket.name");
-		String devMigrationReportPath = MigrationUtils.getPropValues().getProperty(
-				"migrator.asset.migration.report.path");
-
-		LOGGER.info("Uploading a new object to S3 from a file\n");
-		if (file != null) {
-			String fileName = migrationCSVReportName.split("\\.")[0];
-			String extn = migrationCSVReportName.split("\\.")[1];
-
-			PutObjectResult res = s3Client.putObject(new PutObjectRequest(devMigrationBucketName, devMigrationReportPath
-					+ "/" + fileName.concat("." + dateString).concat("." + extn), file));
-			LOGGER.info("PutObjectResult res:{}", res);
-		}
-
+		IStorage storage = AppContext.getStorage();
+		storage.uploadToStore(file, migrationCSVReportName);
+		
 	}
 
-	// public static String getConfigPath() {
-	// RuntimeMXBean runtimeMxBean = ManagementFactory.getRuntimeMXBean();
-	// List<String> arguments = runtimeMxBean.getInputArguments();
-	//
-	// for (String args : arguments) {
-	// if (args.contains("DconfigDir")) {
-	// String[] paths = args.split("=");
-	// return paths[1];
-	// }
-	//
-	// }
-	// return null;
-	//
-	// }
 
 	/**
 	 * This method is to replicate asset path in s3 for S3 ingestor tool.
@@ -741,110 +718,54 @@ public class MigrationReportUtil {
 	 * @param src
 	 * @param dst
 	 */
-	public static void replicateS3AsAEM(AmazonS3 s3Client,StringBuilder brandPrefix, String src, String dst) {
-		Properties prop = null;
-		String srcBucket = null;
-		String dstBucket = null;
-		String mimeType = null;
-		try {
-			prop = MigrationUtils.getPropValues();
-			srcBucket = prop.getProperty(brandPrefix + "" + MigratorConstants.S3_SOURCE_BUCKET_NAME);
-			dstBucket = prop.getProperty(brandPrefix + "" + MigratorConstants.S3_DESTINATION_BUCKET_NAME);
+//	public static void replicateS3AsAEM(StringBuilder brandPrefix, String src, String dst) {
+//		
+//		
+//		Properties prop = null;
+//		String srcBucket = null;
+//		String dstBucket = null;
+//		String mimeType = null;
+//		try {
+//			prop = AppContext.getPropValues();
+//			srcBucket = prop.getProperty(brandPrefix + "" + MigratorConstants.S3_SOURCE_BUCKET_NAME);
+//			dstBucket = prop.getProperty(brandPrefix + "" + MigratorConstants.S3_DESTINATION_BUCKET_NAME);
+//
+//			LOGGER.info("-------------S3 Replication Start----------------");
+//			LOGGER.info("AppContext replicateS3AsAEM :srcBucket:{} - src:{}", srcBucket, src);
+//			LOGGER.info("AppContext replicateS3AsAEM :dstBucket:{} - dst:{}", dstBucket, dst);
+//
+//			String fileExtension = AppContext.getFileExtension(src);
+//
+//			if (!fileExtension.isEmpty() && BusinessRulesUtil.MimeTypeMap != null
+//					&& BusinessRulesUtil.MimeTypeMap.size() > 0
+//					&& BusinessRulesUtil.MimeTypeMap.containsKey(fileExtension.toLowerCase())) {
+//				mimeType = BusinessRulesUtil.MimeTypeMap.get(fileExtension.toLowerCase());
+//			}
+//
+//			s3MultiPartUpload(srcBucket, dstBucket, src, dst, s3Client, mimeType);
+//		} catch (AmazonS3Exception ase) {
+//			LOGGER.error(
+//					"AppContext : replicateS3AsAEM : S3 replication failed :AmazonS3Exception : {} : Src Key:{}",
+//					ase, src);
+//			src = trySecondAttemptToUpload(src, dst, srcBucket, dstBucket, s3Client, mimeType);
+//		} catch (AmazonServiceException ase) {
+//			LOGGER.error(
+//					"AppContext : replicateS3AsAEM : S3 replication failed :AmazonServiceException : {}: Src Key:{}",
+//					ase, src);
+//		} catch (AmazonClientException ace) {
+//			LOGGER.error(
+//					"AppContext : replicateS3AsAEM : S3 replication failed :AmazonClientException : {} : Src Key:{}",
+//					ace, src);
+//		} catch (MigratorServiceException e) {
+//			LOGGER.error("AppContext : replicateS3AsAEM : S3 replication failed : {} : Src Key:{}", e, src);
+//		} catch (Exception e) {
+//			LOGGER.error("AppContext : replicateS3AsAEM : S3 replication failed :Exception : {} : Src Key:{}", e,
+//					src);
+//		}
+//		LOGGER.info("-------------S3 Replication End----------------");
+//	}
 
-			LOGGER.info("-------------S3 Replication Start----------------");
-			LOGGER.info("MigrationUtils replicateS3AsAEM :srcBucket:{} - src:{}", srcBucket, src);
-			LOGGER.info("MigrationUtils replicateS3AsAEM :dstBucket:{} - dst:{}", dstBucket, dst);
 
-			String fileExtension = MigrationUtils.getFileExtension(src);
-
-			if (!fileExtension.isEmpty() && BusinessRulesUtil.MimeTypeMap != null
-					&& BusinessRulesUtil.MimeTypeMap.size() > 0
-					&& BusinessRulesUtil.MimeTypeMap.containsKey(fileExtension.toLowerCase())) {
-				mimeType = BusinessRulesUtil.MimeTypeMap.get(fileExtension.toLowerCase());
-			}
-
-			s3MultiPartUpload(srcBucket, dstBucket, src, dst, s3Client, mimeType);
-		} catch (AmazonS3Exception ase) {
-			LOGGER.error(
-					"MigrationUtils : replicateS3AsAEM : S3 replication failed :AmazonS3Exception : {} : Src Key:{}",
-					ase, src);
-			src = trySecondAttemptToUpload(src, dst, srcBucket, dstBucket, s3Client, mimeType);
-		} catch (AmazonServiceException ase) {
-			LOGGER.error(
-					"MigrationUtils : replicateS3AsAEM : S3 replication failed :AmazonServiceException : {}: Src Key:{}",
-					ase, src);
-		} catch (AmazonClientException ace) {
-			LOGGER.error(
-					"MigrationUtils : replicateS3AsAEM : S3 replication failed :AmazonClientException : {} : Src Key:{}",
-					ace, src);
-		} catch (MigratorServiceException e) {
-			LOGGER.error("MigrationUtils : replicateS3AsAEM : S3 replication failed : {} : Src Key:{}", e, src);
-		} catch (Exception e) {
-			LOGGER.error("MigrationUtils : replicateS3AsAEM : S3 replication failed :Exception : {} : Src Key:{}", e,
-					src);
-		}
-		LOGGER.info("-------------S3 Replication End----------------");
-	}
-
-	private static String trySecondAttemptToUpload(String src, String dst, String srcBucket, String dstBucket,
-			AmazonS3 s3, String mimeType) {
-		try {
-			String[] filename = src.split("\\.");
-			if (filename.length > 1) {
-				if (isLowerCase(filename[1])) {
-					src = src.toUpperCase();
-				} else {
-					src = src.toLowerCase();
-				}
-				s3MultiPartUpload(srcBucket, dstBucket, src, dst, s3, mimeType);
-			}
-
-		} catch (Exception e) {
-			LOGGER.error(
-					"MigrationUtils : replicateS3AsAEM : S3 replication failed :Exception(2nd Attempt) : {} : Src Key:{}",
-					e, src);
-		}
-		return src;
-	}
-
-	private static boolean isLowerCase(String s) {
-		for (int i = 0; i < s.length(); i++) {
-			if (Character.isAlphabetic(s.charAt(i)) && !Character.isLowerCase(s.charAt(i))) {
-				return false;
-			}
-		}
-		return true;
-	}
-
-	public static File getFileFromS3(AmazonS3 s3Client, String fileName, String s3Folder) {
-
-		File file = null;
-		String devMigrationBucketName = "";
-		try {
-
-			devMigrationBucketName = MigrationUtils.getPropValues().getProperty(
-					"migrator.dev.asset.migration.bucket.name");
-			S3Object s3object = s3Client.getObject(new GetObjectRequest(devMigrationBucketName, s3Folder + "/" + fileName));
-			try (InputStream inputStream = s3object.getObjectContent()) {
-				file = File.createTempFile("s3test", "");
-				try (FileOutputStream outputStream = new FileOutputStream(file)) {
-					int read;
-					byte[] bytes = new byte[1024];
-					while ((read = inputStream.read(bytes)) != -1) {
-						outputStream.write(bytes, 0, read);
-					}
-				}
-			}
-
-		} catch (MigratorServiceException e) {
-			e.printStackTrace();
-		} catch (IOException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
-		return file;
-
-	}
 
 	public static void updateLastProcessedAsset(String assetIdBeingProcessed) throws IOException {
 
@@ -852,7 +773,7 @@ public class MigrationReportUtil {
 		BufferedWriter bw = null;
 		FileWriter fw = null;
 		try {
-			prop = MigrationUtils.getPropValues();
+			prop = AppContext.getAppConfig();
 
 			String migrationFailureFilePath = prop
 					.getProperty(MigratorConstants.MIGRATION_INTERRUPT_LAST_PROCESSED_ASSET_FILE_PATH);
@@ -860,10 +781,6 @@ public class MigrationReportUtil {
 			fw = new FileWriter(file.getPath());
 			bw = new BufferedWriter(fw);
 			bw.write("Last Processed Asset Is :" + assetIdBeingProcessed);
-		} catch (MigratorServiceException e) {
-			LOGGER.error(
-					"MigrationUtils : updateLastProcessedAsset : updateLastProcessedAsset failed :MigratorServiceException : {}",
-					e);
 		} finally {
 
 			try {
@@ -873,7 +790,7 @@ public class MigrationReportUtil {
 					fw.close();
 			} catch (IOException ex) {
 				LOGGER.error(
-						"MigrationUtils : updateLastProcessedAsset : updateLastProcessedAsset failed :IOException : {}",
+						"AppContext : updateLastProcessedAsset : updateLastProcessedAsset failed :IOException : {}",
 						ex);
 
 			}
@@ -881,63 +798,6 @@ public class MigrationReportUtil {
 
 	}
 
-	public static void s3MultiPartUpload(String sourceBucketName, String targetBucketName, String sourceObjectKey,
-			String targetObjectKey, AmazonS3 s3Client, String mimeType) {
-		List<CopyPartResult> copyResponses = new ArrayList<CopyPartResult>();
-
-		ObjectMetadata metadata = new ObjectMetadata();
-		if (mimeType != null) {
-			metadata.setContentType(mimeType);
-		}
-
-		InitiateMultipartUploadRequest initiateRequest = new InitiateMultipartUploadRequest(targetBucketName,
-				targetObjectKey, metadata);
-
-		InitiateMultipartUploadResult initResult = s3Client.initiateMultipartUpload(initiateRequest);
-
-		// Get object size.
-		GetObjectMetadataRequest metadataRequest = new GetObjectMetadataRequest(sourceBucketName, sourceObjectKey);
-
-		ObjectMetadata metadataResult = s3Client.getObjectMetadata(metadataRequest);
-		long objectSize = metadataResult.getContentLength(); // in bytes
-
-		// Copy parts.
-		long partSize = 4096 * (long) Math.pow(2.0, 20.0); // 4 GB
-
-		long bytePosition = 0;
-
-		LOGGER.info("MigrationUtils replicateS3AsAEM s3MultiPartUpload :src : {}  -  objectSize:{}", sourceObjectKey,
-				objectSize);
-		for (int i = 1; bytePosition < objectSize; i++) {
-			CopyPartRequest copyRequest = new CopyPartRequest()
-					.withDestinationBucketName(targetBucketName)
-					.withDestinationKey(targetObjectKey)
-					.withSourceBucketName(sourceBucketName)
-					.withSourceKey(sourceObjectKey)
-					.withUploadId(initResult.getUploadId())
-					.withFirstByte(bytePosition)
-					.withLastByte(
-							bytePosition + partSize - 1 >= objectSize ? objectSize - 1 : bytePosition + partSize - 1)
-					.withPartNumber(i);
-
-			copyResponses.add(s3Client.copyPart(copyRequest));
-			bytePosition += partSize;
-
-		}
-		CompleteMultipartUploadRequest completeRequest = new CompleteMultipartUploadRequest(targetBucketName,
-				targetObjectKey, initResult.getUploadId(), GetETags(copyResponses));
-		CompleteMultipartUploadResult completeUploadResponse = s3Client.completeMultipartUpload(completeRequest);
-		LOGGER.info("MigrationUtils replicateS3AsAEM s3MultiPartUpload :CopyObjectResult:{}", completeUploadResponse);
-	}
-
-	// Helper function that constructs ETags.
-	private static List<PartETag> GetETags(List<CopyPartResult> responses) {
-		List<PartETag> etags = new ArrayList<PartETag>();
-		for (CopyPartResult response : responses) {
-			etags.add(new PartETag(response.getPartNumber(), response.getETag()));
-		}
-		return etags;
-	}
 
 	private static boolean containsHanScript(String s) {
 		return s.codePoints().anyMatch(
@@ -953,7 +813,7 @@ public class MigrationReportUtil {
 	 * @param nonMigratedAssetsMap
 	 * @param migratedAssetsMap
 	 */
-	public static void logMigrationSummaryReport(AmazonS3 s3Client,StringBuilder brandPrefix, Map<String, String> migratedAssetsMap,
+	public static void logMigrationSummaryReport(StringBuilder brandPrefix, Map<String, String> migratedAssetsMap,
 			Map<String, String> nonMigratedAssetsMap) {
 
 		/**
@@ -962,7 +822,7 @@ public class MigrationReportUtil {
 		Properties prop;
 		XSSFWorkbook workbook = null;
 		try {
-			prop = MigrationUtils.getPropValues();
+			prop = AppContext.getAppConfig();
 
 			String migrationSummaryReportName = prop.getProperty(brandPrefix + ""
 					+ MigratorConstants.MIGRATION_SUMMARY_REPORT_PATH);
@@ -1046,7 +906,7 @@ public class MigrationReportUtil {
 				out.close();
 				LOGGER.info("migration_summary.xlsx written successfully on disk.");
 
-				uploadFileToS3(s3Client, file, migrationSummaryReportName);
+				uploadFileToStorage( file, migrationSummaryReportName);
 			}
 
 		} catch (Exception e) {

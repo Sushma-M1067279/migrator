@@ -12,9 +12,9 @@ import org.slf4j.LoggerFactory;
 
 import com.mindtree.holoxo.config.HoloxoReqConfigurationLoader;
 import com.mindtree.models.dto.BrandMasterMappingDto;
+import com.mindtree.transformer.service.AppContext;
+import com.mindtree.transformer.service.MigratorServiceException;
 import com.mindtree.utils.constants.MigratorConstants;
-import com.mindtree.utils.exception.MigratorServiceException;
-import com.mindtree.utils.helper.MigrationUtils;
 
 /**
  * This class contains Holoxo brand specific rules for metadata population
@@ -43,7 +43,7 @@ public class HoloxoMetadataUtil {
 
 	public static String folderMappingMethod(Map<String, String> assetMetadataMap) throws MigratorServiceException {
 
-		Properties prop = MigrationUtils.getPropValues();
+		Properties prop = AppContext.getAppConfig();
 		String brand = prop.getProperty(brandPrefix + "" + MigratorConstants.BRAND);
 		String holoxoMigrationType = prop.getProperty(brandPrefix + "" + MigratorConstants.BRAND_ASSET_MIGRATION_TYPE);
 

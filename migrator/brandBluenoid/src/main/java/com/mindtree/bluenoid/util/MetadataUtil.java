@@ -6,6 +6,7 @@ import java.util.Map;
 
 import com.mindtree.bluenoid.config.BluenoidReqConfigurationLoader;
 import com.mindtree.models.dto.BrandMasterMappingDto;
+import com.mindtree.transformer.service.AppContext;
 import com.mindtree.utils.constants.MigratorConstants;
 import com.mindtree.utils.helper.BusinessRulesUtil;
 
@@ -14,6 +15,8 @@ import com.mindtree.utils.helper.BusinessRulesUtil;
  *
  */
 public class MetadataUtil {
+	
+	private static String fileSep = "" + AppContext.getStorage().fileSeparator();
 
 	private MetadataUtil() {
 
@@ -110,7 +113,7 @@ public class MetadataUtil {
 	 */
 	public static void applyFolderMappingRule(String assetPath, Map<String, String> assetMetadataMap, String brand) {
 		String assetMainFolderName = null;
-		String[] assetsFolders = assetPath.split(MigratorConstants.FILE_SEPARETOR);
+		String[] assetsFolders = assetPath.split("\\"+fileSep);
 		if (assetsFolders.length > 0 && assetsFolders[0] != null) {
 			assetMainFolderName = assetsFolders[0];
 
@@ -127,7 +130,7 @@ public class MetadataUtil {
 				} else {
 					if (assetsFolders.length > 1) {
 						System.out.println("assetMainFolderName:" + assetMainFolderName);
-						assetMainFolderName = assetMainFolderName.concat("/").concat(assetsFolders[1]);
+						assetMainFolderName = assetMainFolderName.concat(fileSep).concat(assetsFolders[1]);
 						subPath = assetPath.substring(assetMainFolderName.length() + 1, assetPath.length());
 
 						if (BluenoidReqConfigurationLoader.folderMappingMap
@@ -181,7 +184,7 @@ public class MetadataUtil {
 	private static void updateAbsTargetPath(Map<String, String> assetMetadataMap, String assetMainFolderName,
 			String subPath, String brand) {
 		String aemTargetFolder = BluenoidReqConfigurationLoader.folderMappingMap.get(assetMainFolderName.toLowerCase());
-		String assetTargetPath = brand.concat("/").concat(aemTargetFolder).concat("/").concat(subPath);
+		String assetTargetPath = brand.concat(fileSep).concat(aemTargetFolder).concat(fileSep).concat(subPath);
 
 		assetMetadataMap.put(MigratorConstants.ABS_TARGET_PATH, assetTargetPath);
 		BusinessRulesUtil.absTargetPathsSet.add(assetTargetPath.toLowerCase());

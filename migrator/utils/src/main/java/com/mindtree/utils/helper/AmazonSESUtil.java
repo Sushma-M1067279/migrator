@@ -22,6 +22,8 @@ import org.slf4j.LoggerFactory;
 
 import com.amazonaws.AmazonClientException;
 import com.amazonaws.AmazonServiceException;
+import com.amazonaws.ClientConfiguration;
+import com.amazonaws.auth.AWSCredentialsProvider;
 import com.amazonaws.regions.Regions;
 import com.amazonaws.services.simpleemail.AmazonSimpleEmailService;
 import com.amazonaws.services.simpleemail.AmazonSimpleEmailServiceClientBuilder;
@@ -32,8 +34,9 @@ import com.amazonaws.services.simpleemail.model.Message;
 import com.amazonaws.services.simpleemail.model.RawMessage;
 import com.amazonaws.services.simpleemail.model.SendEmailRequest;
 import com.amazonaws.services.simpleemail.model.SendRawEmailRequest;
+import com.mindtree.transformer.service.AppContext;
+import com.mindtree.transformer.service.MigratorServiceException;
 import com.mindtree.utils.constants.MigratorConstants;
-import com.mindtree.utils.exception.MigratorServiceException;
 
 public class AmazonSESUtil {
 	
@@ -50,7 +53,7 @@ public class AmazonSESUtil {
 	// is still in the sandbox, this address must be verified.
 	private static final String TO = "onkar.vijayvithal@mindtree.com";
 
-	private static String date = MigrationUtils.getDate();
+	private static String date = MigrationUtil.getDate();
 	// The subject line for the email.
 	
 	private static StringBuilder SUBJECT = new StringBuilder("ELC : Asset Migration Validation Report - ").append(date);
@@ -74,11 +77,28 @@ public class AmazonSESUtil {
 			+ "<p>ELC Team</p>"
 			+ "</body>" + "</html>";
 
+	private static AWSCredentialsProvider awsCredential;
+	private static ClientConfiguration awsClientConfig;
+
+	private static AWSCredentialsProvider getAWSCredentials() {
+		return awsCredential;
+	}
+
+	private static ClientConfiguration getAWSClientConfiguration() {
+		if (null == awsClientConfig) {
+			LOGGER.info("creating new AWS instance 2");
+			awsClientConfig = new ClientConfiguration();
+
+		}
+		return awsClientConfig;
+
+	}
+
 	private static AmazonSimpleEmailService getAmazonSesInstance() throws MigratorServiceException {
 		try {
 			if (null == sesClient) {
-				sesClient = AmazonSimpleEmailServiceClientBuilder.standard().withClientConfiguration(MigrationUtils.getAWSClientConfiguration())
-						.withCredentials(MigrationUtils.getAWSCredentials()).withRegion(Regions.US_EAST_1).build();
+				sesClient = AmazonSimpleEmailServiceClientBuilder.standard().withClientConfiguration(getAWSClientConfiguration())
+						.withCredentials(getAWSCredentials()).withRegion(Regions.US_EAST_1).build();
 			}
 		} catch (AmazonServiceException ase) {
 			LOGGER.error(

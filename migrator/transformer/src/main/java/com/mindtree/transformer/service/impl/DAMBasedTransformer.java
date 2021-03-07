@@ -19,15 +19,16 @@ import com.mindtree.holoxo.util.HoloxoMetadataUtil;
 import com.mindtree.models.dto.BrandMasterMappingDto;
 import com.mindtree.transformer.factory.MigratorBusinessFactory;
 import com.mindtree.transformer.service.AbstractTransformer;
+import com.mindtree.transformer.service.AppContext;
 import com.mindtree.transformer.service.IDataFileReader;
 import com.mindtree.transformer.service.ITransformer;
+import com.mindtree.transformer.service.MigratorServiceException;
 import com.mindtree.transformer.service.XExcelFileReader;
 import com.mindtree.utils.business.IMigratorBusiness;
 import com.mindtree.utils.constants.MigratorConstants;
-import com.mindtree.utils.exception.MigratorServiceException;
 import com.mindtree.utils.helper.MasterMetadataMapReader;
 import com.mindtree.utils.helper.MigrationReportUtil;
-import com.mindtree.utils.helper.MigrationUtils;
+import com.mindtree.utils.helper.MigrationUtil;
 
 /**
  * Transformer for DAM based source systems which provide metadata and
@@ -79,15 +80,15 @@ public class DAMBasedTransformer extends AbstractTransformer {
 	public boolean transform(String brandAbbreviation, String instanceNumb) {
 
 		instanceNumber = instanceNumb;
-		StringBuilder brandPrefix = MigrationUtils.prepareBrandPrefix(brandAbbreviation);
+		StringBuilder brandPrefix = MigrationUtil.prepareBrandPrefix(brandAbbreviation);
 		boolean isSuccess = false;
 		LOGGER.info("LegacyDAMBasedMetadataTransformer transform : brandPrefix:{}", brandPrefix);
 		try {
 
-			Properties prop = MigrationUtils.getPropValues();
+			Properties prop = AppContext.getAppConfig();
 
-			String masterBrandMappingFileName = MigrationUtils.getPropValues().getProperty("migrator.asset.masterBrandMappingFileName");
-			String mastetToBrandMappingSheetName = MigrationUtils.getPropValues().getProperty("migrator.asset.mastetToBrandMappingSheetName");
+			String masterBrandMappingFileName = AppContext.getAppConfig().getProperty("migrator.asset.masterBrandMappingFileName");
+			String mastetToBrandMappingSheetName = AppContext.getAppConfig().getProperty("migrator.asset.mastetToBrandMappingSheetName");
 			/**
 			 * Read brand specific properties.
 			 */
@@ -108,7 +109,7 @@ public class DAMBasedTransformer extends AbstractTransformer {
 
 			// Read master metadata mapping sheet
 			Map<String, BrandMasterMappingDto> masterMetadataMap = MasterMetadataMapReader.getBrandMasterMapping(
-					(AmazonS3) storage.getNativeClient(), masterBrandMappingFileName, mastetToBrandMappingSheetName, brandAbbreviation);
+					masterBrandMappingFileName, mastetToBrandMappingSheetName, brandAbbreviation);
 
 			if(masterMetadataMap == null){
 				return false;
@@ -118,7 +119,7 @@ public class DAMBasedTransformer extends AbstractTransformer {
 			boolean needsMigration = false;
 
 			// Read asset dump sheet
-			IDataFileReader excelFileReader = new XExcelFileReader(storage,brandAssetDumpFileName, assetDumpSheetIndex,brandAbbreviation);
+			IDataFileReader excelFileReader = new XExcelFileReader(brandAssetDumpFileName, assetDumpSheetIndex,brandAbbreviation);
 			int count = 0;
 			
 			if(excelFileReader == null){
@@ -158,9 +159,9 @@ public class DAMBasedTransformer extends AbstractTransformer {
 				}
 			}
 			// create migration report
-			MigrationReportUtil.createSummaryReport((AmazonS3)storage.getNativeClient(), brandPrefix, migratedAssetsMap, nonMigratedAssetsMap);
+			MigrationReportUtil.createSummaryReport( brandPrefix, migratedAssetsMap, nonMigratedAssetsMap);
 			// create output CSV's and replicate assets from source to destination path
-			isSuccess = MigrationReportUtil.generateOutputAndReplicateAssets((AmazonS3)storage.getNativeClient(), brandPrefix, 
+			isSuccess = MigrationReportUtil.generateOutputAndReplicateAssets(brandPrefix, 
 					finalAssetMetadataMapKeySet, finalAssetMetadataMapList);
 		} catch (MigratorServiceException e) {
 			LOGGER.error(
@@ -188,7 +189,7 @@ public class DAMBasedTransformer extends AbstractTransformer {
 		String assetId = currentRow[MigratorConstants.COLUMN_ASSETID];
 		if (assetId.equalsIgnoreCase(lastProcessedAssetByInterruption)) {
 			lastProcessedAssetByInterruption = "-1";
-			migrationAssetId = MigrationUtils.generateAssetId(brand, instanceNumber, ++assetCounter);
+			migrationAssetId = MigrationUtil.generateAssetId(brand, instanceNumber, ++assetCounter);
 			Thread.currentThread().setName(migrationAssetId);
 			assetIdBeingProcessed = assetId;
 			needsMigration = processRow(masterMetadataMap, assetMetadataMap, assetKindMap, currentRow);
@@ -214,10 +215,10 @@ public class DAMBasedTransformer extends AbstractTransformer {
 			for (Map.Entry<String, String> assetKindMapEntry : assetKindMap.entrySet()) {
 				processXMPAndRenditions(folderPath, masterMetadataMap, assetMetadataMap, assetKindMapEntry);
 			}
-			MigrationUtils.extractRatingsFromFileName(assetMetadataMap);
+			MigrationUtil.extractRatingsFromFileName(assetMetadataMap);
 			assetMetadataMap.put(MigratorConstants.MIGRATION_ASSET_ID, migrationAssetId);
 			assetMetadataMap.put(MigratorConstants.SOURCE,
-					MigrationUtils.encode(MigratorConstants.SOURCE_ASSET_MIGRATION));
+					MigrationUtil.encode(MigratorConstants.SOURCE_ASSET_MIGRATION));
 			finalAssetMetadataMapList.add(new HashMap<String, String>(assetMetadataMap));
 			finalAssetMetadataMapKeySet.addAll(assetMetadataMap.keySet());
 
@@ -252,15 +253,15 @@ public class DAMBasedTransformer extends AbstractTransformer {
 		 * Process XMP Metadata
 		 */
 		if (assetKindMapEntry.getKey().equalsIgnoreCase(MigratorConstants.XMP_METADATA)
-				&& MigrationUtils.getFileExtension(assetKindMapEntry.getValue()).equalsIgnoreCase(
+				&& MigrationUtil.getFileExtension(assetKindMapEntry.getValue()).equalsIgnoreCase(
 						MigratorConstants.FILE_EXTENTION_XMP)) {
 			String xmpFileName = assetKindMapEntry.getValue();
 
 			/**
 			 * Read XMP metadata file and convert to a map.
 			 */
-			String content = storage.getFileContent(MigratorConstants.S3_BUCKET_NAME, folderPath + "/" + xmpFileName);
-			Map<String, String> xmpMetadataMap = MigrationUtils.fetchDataFromXmp(content);
+			String content = storage.getFileContent(folderPath + storage.fileSeparator() + xmpFileName);
+			Map<String, String> xmpMetadataMap = MigrationUtil.fetchDataFromXmp(content);
 			/**
 			 * Iterate over XMP map to match master meta datafield and apply
 			 * business rules.
@@ -274,7 +275,7 @@ public class DAMBasedTransformer extends AbstractTransformer {
 			/**
 			 * Add metadata extracted from XMP to main asset metadata map
 			 */
-			assetMetadataMap.put(MigratorConstants.AEM_PROPERTY_XMPFILE, MigrationUtils.encode(xmpFileName));
+			assetMetadataMap.put(MigratorConstants.AEM_PROPERTY_XMPFILE, MigrationUtil.encode(xmpFileName));
 			assetMetadataMap.putAll(assetMetadataMapFromXMP);
 
 		}
@@ -293,7 +294,7 @@ public class DAMBasedTransformer extends AbstractTransformer {
 			}
 
 			assetMetadataMap.put(MigratorConstants.AEM_PROPERTY_RENDITIONS,
-					MigrationUtils.encode(renditions.toString()));
+					MigrationUtil.encode(renditions.toString()));
 		}
 
 	}
@@ -331,7 +332,7 @@ public class DAMBasedTransformer extends AbstractTransformer {
 								exportFlowFlag, xmpMetadata, metadataHeader);
 					}
 				} else {
-					assetMetadataMapFromXMP.put(masterMetadataHeader, MigrationUtils.encode(xmpMetadata.getValue()));
+					assetMetadataMapFromXMP.put(masterMetadataHeader, MigrationUtil.encode(xmpMetadata.getValue()));
 				}
 			}
 		}
@@ -370,7 +371,7 @@ public class DAMBasedTransformer extends AbstractTransformer {
 			 * Exclude XMP's when Asset Kind column is blank
 			 */
 			if (assetKind.isEmpty()
-					&& MigrationUtils.getFileExtension(fileName).equalsIgnoreCase(MigratorConstants.FILE_EXTENTION_XMP)) {
+					&& MigrationUtil.getFileExtension(fileName).equalsIgnoreCase(MigratorConstants.FILE_EXTENTION_XMP)) {
 				assetKindMap.put(MigratorConstants.XMP_METADATA, fileName);
 			} else {
 				needsMigration = processAssetRow(masterMetadataMap, assetMetadataMap, assetKindMap, currentRow);
@@ -477,7 +478,7 @@ public class DAMBasedTransformer extends AbstractTransformer {
 	 */
 	private void updateAssetMetadataTableColumns(Map<String, String> brandMetadataMap) {
 		brandMetadataMap.put(MigratorConstants.MIGRATION_ASSET_ID, migrationAssetId);
-		brandMetadataMap.put(MigratorConstants.SOURCE, MigrationUtils.encode(MigratorConstants.SOURCE_ASSET_MIGRATION));
+		brandMetadataMap.put(MigratorConstants.SOURCE, MigrationUtil.encode(MigratorConstants.SOURCE_ASSET_MIGRATION));
 	}
 
 }

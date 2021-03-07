@@ -3,8 +3,6 @@ package com.mindtree.transformer.service;
 
 import java.util.List;
 
-import com.mindtree.utils.exception.MigratorServiceException;
-
 /**
  * @author M1032046
  *

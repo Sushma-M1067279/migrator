@@ -8,8 +8,8 @@ import java.util.TreeMap;
 import com.mindtree.models.AssetMetadataMapper;
 import com.mindtree.models.MetadataDto;
 import com.mindtree.models.dto.BrandMasterMappingDto;
+import com.mindtree.transformer.service.MigratorServiceException;
 import com.mindtree.utils.constants.MigratorConstants;
-import com.mindtree.utils.exception.MigratorServiceException;
 
 public class CommonHelper {
 

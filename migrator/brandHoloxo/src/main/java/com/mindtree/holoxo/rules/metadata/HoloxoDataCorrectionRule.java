@@ -2,8 +2,9 @@ package com.mindtree.holoxo.rules.metadata;
 
 import com.mindtree.holoxo.config.HoloxoReqConfigurationLoader;
 import com.mindtree.models.vo.XLSMetadataRuleVO;
+import com.mindtree.transformer.service.AppContext;
 import com.mindtree.utils.constants.MigratorConstants;
-import com.mindtree.utils.helper.MigrationUtils;
+import com.mindtree.utils.helper.MigrationUtil;
 import com.mindtree.utils.service.AbstractXLSMetadataRule;
 
 public class HoloxoDataCorrectionRule extends AbstractXLSMetadataRule {
@@ -27,7 +28,7 @@ public class HoloxoDataCorrectionRule extends AbstractXLSMetadataRule {
 			}
 		}
 
-		ruleVO.assetMetadataMap.put(ruleVO.masterMetadataHeader, MigrationUtils.encode(ruleVO.brandMetadataValue));
+		ruleVO.assetMetadataMap.put(ruleVO.masterMetadataHeader, MigrationUtil.encode(ruleVO.brandMetadataValue));
 	}
 
 }

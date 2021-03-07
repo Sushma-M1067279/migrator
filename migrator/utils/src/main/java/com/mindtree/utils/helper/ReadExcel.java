@@ -13,7 +13,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.amazonaws.services.s3.AmazonS3;
-import com.mindtree.utils.exception.MigratorServiceException;
+import com.mindtree.transformer.service.AppContext;
+import com.mindtree.transformer.service.MigratorServiceException;
 
 public class ReadExcel {
 
@@ -34,7 +35,7 @@ public class ReadExcel {
 	 * @return
 	 * @throws MigratorServiceException
 	 */
-	public static XSSFSheet getExcelSheet(AmazonS3 S3Client, String fileName, String sheetname, String s3Folder)
+	public static XSSFSheet getExcelSheet(String fileName, String sheetname, String folder)
 			throws MigratorServiceException {
 		XSSFSheet assetSheet = null;
 		XSSFWorkbook workbook = null;
@@ -42,8 +43,8 @@ public class ReadExcel {
 		try {
 			LOGGER.info("fileName : "+fileName);
 			LOGGER.info("sheetname : "+sheetname);
-			LOGGER.info("s3Folder : "+s3Folder);
-			File file = MigrationReportUtil.getFileFromS3(S3Client, fileName, s3Folder);
+			LOGGER.info("folder : "+folder);
+			File file = AppContext.getStorage().getFile(folder, fileName);
 			WorkbookFactory.create(file);
 			opcPackage = OPCPackage.open(file);
 			workbook = new XSSFWorkbook(opcPackage);
@@ -75,20 +76,21 @@ public class ReadExcel {
 	 * @return
 	 * @throws MigratorServiceException
 	 */
-	public static XSSFWorkbook getExcelWorkbook(AmazonS3 s3Client, String fileName, String s3Folder) throws MigratorServiceException {
+	public static XSSFWorkbook getExcelWorkbook(String fileName, String folder) throws MigratorServiceException {
 		XSSFWorkbook workbook = null;
-//		OPCPackage opcPackage = null;
+		OPCPackage opcPackage = null;
 		try {
-			LOGGER.info("filename : "+fileName+" S3folder: "+s3Folder);
-			File file = MigrationReportUtil.getFileFromS3(s3Client, fileName, s3Folder);
+			LOGGER.info("filename : "+fileName+" S3folder: "+ folder);
+			
+			File file = AppContext.getStorage().getFile(folder, fileName);
 			WorkbookFactory.create(file);
 			FileInputStream inputStream = new FileInputStream(file);
 
-			//opcPackage = OPCPackage.open(file);
-//			workbook = new XSSFWorkbook(inputStream);
-//		} catch (InvalidFormatException e) {
-//			LOGGER.error("getExcelSheet:  InvalidFormatException ", e);
-//			throw new MigratorServiceException("getExcelSheet:  InvalidFormatException ", e);
+			opcPackage = OPCPackage.open(file);
+			workbook = new XSSFWorkbook(inputStream);
+		} catch (InvalidFormatException e) {
+			LOGGER.error("getExcelSheet:  InvalidFormatException ", e);
+			throw new MigratorServiceException("getExcelSheet:  InvalidFormatException ", e);
 		} catch (Exception e) {
 			LOGGER.error("getExcelSheet:  IOException", e);
 			throw new MigratorServiceException("getExcelSheet:  IOException", e);

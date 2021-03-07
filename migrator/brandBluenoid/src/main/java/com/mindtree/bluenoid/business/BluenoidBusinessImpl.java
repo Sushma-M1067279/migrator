@@ -20,9 +20,9 @@ import com.mindtree.bluenoid.rules.BluenoidProgramSubfolderMetadataRule;
 import com.mindtree.models.dto.BrandMasterMappingDto;
 import com.mindtree.models.vo.DriveBasedMetadataRuleVO;
 import com.mindtree.models.vo.ExtensionFilterVO;
+import com.mindtree.transformer.service.MigratorServiceException;
 import com.mindtree.utils.business.IMigratorBusiness;
 import com.mindtree.utils.constants.MigratorConstants;
-import com.mindtree.utils.exception.MigratorServiceException;
 import com.mindtree.utils.service.FilterEvaluator;
 import com.mindtree.utils.service.RulesEvaluator;
 

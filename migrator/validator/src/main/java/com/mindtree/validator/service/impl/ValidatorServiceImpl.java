@@ -27,10 +27,10 @@ import org.slf4j.LoggerFactory;
 import org.springframework.http.ResponseEntity;
 
 import com.amazonaws.services.s3.AmazonS3;
+import com.mindtree.transformer.service.AppContext;
+import com.mindtree.transformer.service.MigratorServiceException;
 import com.mindtree.utils.constants.MigratorConstants;
-import com.mindtree.utils.exception.MigratorServiceException;
 import com.mindtree.utils.helper.AmazonSESUtil;
-import com.mindtree.utils.helper.MigrationUtils;
 import com.mindtree.utils.helper.ReadExcel;
 import com.mindtree.validator.http.RestHttpClient;
 import com.mindtree.validator.model.AemQueryBuilderResponse;
@@ -77,12 +77,7 @@ public class ValidatorServiceImpl implements IValidatorService {
 	@Override
 	public AemQueryBuilderResponse getAllAEMAssets(long offSet) throws MigratorServiceException {
 
-		try {
-			prop = MigrationUtils.getPropValues();
-		} catch (MigratorServiceException e) {
-			e.printStackTrace();
-			return null;
-		}
+		prop = AppContext.getAppConfig();
 		httpClient = new RestHttpClient();
 		ResponseEntity<AemQueryBuilderResponse> aemResponse = null;
 		AemRequest aemRequestBody = this.buildRequestBodyForAsset(offSet);
@@ -197,7 +192,7 @@ public class ValidatorServiceImpl implements IValidatorService {
 		XSSFSheet assetSheet = null;
 		try {
 			String s3Folder = prop.getProperty("migrator.dev.asset.migration.config.path");
-			assetSheet = ReadExcel.getExcelSheet((AmazonS3)MigrationUtils.getStorageClient(),fileName, sheetName, s3Folder);
+			assetSheet = ReadExcel.getExcelSheet(fileName, sheetName, s3Folder);
 			LOGGER.info("Validator: { getAllAssetsFromExcel : fileName - {}, sheetName - {}, s3Folder - {}", fileName,
 					sheetName, s3Folder);
 			if (null == assetSheet) {

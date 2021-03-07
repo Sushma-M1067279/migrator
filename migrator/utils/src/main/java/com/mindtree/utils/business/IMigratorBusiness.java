@@ -3,7 +3,7 @@ package com.mindtree.utils.business;
 import java.util.Map;
 
 import com.mindtree.models.dto.BrandMasterMappingDto;
-import com.mindtree.utils.exception.MigratorServiceException;
+import com.mindtree.transformer.service.MigratorServiceException;
 
 /**
  * @author M1032046

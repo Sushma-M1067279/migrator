@@ -1,6 +1,9 @@
 package com.mindtree.transformer;
 
+import java.io.File;
 import java.io.IOException;
+import java.util.List;
+import java.util.Map;
 
 import org.apache.poi.EncryptedDocumentException;
 import org.apache.poi.openxml4j.exceptions.InvalidFormatException;
@@ -8,8 +11,9 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.mindtree.transformer.factory.ApplicationFactory;
+import com.mindtree.transformer.service.AppContext;
+import com.mindtree.transformer.service.IStorage;
 import com.mindtree.transformer.service.ITransformer;
-import com.mindtree.utils.helper.MigrationUtils;
 
 /**
  * This is the entry point for the transformation process.
@@ -47,7 +51,7 @@ public class TransformerMain {
 			LOGGER.error("TransformMain : main : Errrors while initiating the application.");
 			return;
 		}
-		
+
 		if (args != null && args.length > 0) {
 
 			String brandCode = args[0];

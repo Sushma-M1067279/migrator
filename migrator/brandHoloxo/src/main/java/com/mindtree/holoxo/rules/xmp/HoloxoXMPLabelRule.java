@@ -1,8 +1,9 @@
 package com.mindtree.holoxo.rules.xmp;
 
 import com.mindtree.models.vo.XMPMetadataRuleVO;
+import com.mindtree.transformer.service.AppContext;
 import com.mindtree.utils.constants.MigratorConstants;
-import com.mindtree.utils.helper.MigrationUtils;
+import com.mindtree.utils.helper.MigrationUtil;
 import com.mindtree.utils.service.AbstractXMPMetadataRule;
 
 public class HoloxoXMPLabelRule extends AbstractXMPMetadataRule {
@@ -26,7 +27,7 @@ public class HoloxoXMPLabelRule extends AbstractXMPMetadataRule {
 		if (null != selectAltApprove && selectAltApprove.equalsIgnoreCase(MigratorConstants.XMP_VALUE_ALT)) {
 			selectAltApprove = MigratorConstants.AEM_XMP_VALUE_SECOND;
 		}
-		ruleVO.assetMetadataMapFromXMP.put(ruleVO.masterMetadataHeader, MigrationUtils.encode(selectAltApprove));
+		ruleVO.assetMetadataMapFromXMP.put(ruleVO.masterMetadataHeader, MigrationUtil.encode(selectAltApprove));
 
 	}
 

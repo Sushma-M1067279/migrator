@@ -19,10 +19,11 @@ import com.mindtree.models.dto.BrandMasterMappingDto;
 import com.mindtree.models.vo.FolderRuleVO;
 import com.mindtree.models.vo.XLSMetadataRuleVO;
 import com.mindtree.models.vo.XMPMetadataRuleVO;
+import com.mindtree.transformer.service.AppContext;
+import com.mindtree.transformer.service.MigratorServiceException;
 import com.mindtree.utils.business.IMigratorBusiness;
 import com.mindtree.utils.constants.MigratorConstants;
-import com.mindtree.utils.exception.MigratorServiceException;
-import com.mindtree.utils.helper.MigrationUtils;
+import com.mindtree.utils.helper.MigrationUtil;
 import com.mindtree.utils.service.RulesEvaluator;
 
 /**
@@ -101,11 +102,11 @@ public class HoloxoBusinessImpl implements IMigratorBusiness {
 		rulesEvaluator.addRule(new HoloxoXMPRatingRule(ruleVO)).addRule(new HoloxoXMPLabelRule(ruleVO))
 				.addRule(new HoloxoXMPCountryRule(ruleVO)).addRule(new HoloxoXMPColorLabelRule(ruleVO));
 
-		assetMetadataMapFromXMP.put(masterMetadataHeader, MigrationUtils.encode(xmpMetadata.getValue()));
+		assetMetadataMapFromXMP.put(masterMetadataHeader, MigrationUtil.encode(xmpMetadata.getValue()));
 
 		rulesEvaluator.evaluateAllRules();
 
-		assetMetadataMapFromXMP.put(masterMetadataHeader, MigrationUtils.encode(xmpMetadata.getValue()));
+		assetMetadataMapFromXMP.put(masterMetadataHeader, MigrationUtil.encode(xmpMetadata.getValue()));
 	}
 
 	/**

@@ -4,7 +4,13 @@
 package com.mindtree.transformer.service.impl;
 
 import java.io.File;
+import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.InputStream;
+import java.text.Format;
+import java.text.SimpleDateFormat;
+import java.util.ArrayList;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -23,37 +29,51 @@ import com.amazonaws.auth.BasicAWSCredentials;
 import com.amazonaws.regions.Regions;
 import com.amazonaws.services.s3.AmazonS3;
 import com.amazonaws.services.s3.AmazonS3ClientBuilder;
+import com.amazonaws.services.s3.model.AmazonS3Exception;
+import com.amazonaws.services.s3.model.CompleteMultipartUploadRequest;
+import com.amazonaws.services.s3.model.CompleteMultipartUploadResult;
+import com.amazonaws.services.s3.model.CopyPartRequest;
+import com.amazonaws.services.s3.model.CopyPartResult;
+import com.amazonaws.services.s3.model.GetObjectMetadataRequest;
 import com.amazonaws.services.s3.model.GetObjectRequest;
+import com.amazonaws.services.s3.model.InitiateMultipartUploadRequest;
+import com.amazonaws.services.s3.model.InitiateMultipartUploadResult;
 import com.amazonaws.services.s3.model.ListObjectsRequest;
 import com.amazonaws.services.s3.model.ObjectListing;
+import com.amazonaws.services.s3.model.ObjectMetadata;
+import com.amazonaws.services.s3.model.PartETag;
+import com.amazonaws.services.s3.model.PutObjectRequest;
+import com.amazonaws.services.s3.model.PutObjectResult;
 import com.amazonaws.services.s3.model.S3Object;
 import com.amazonaws.services.s3.model.S3ObjectInputStream;
 import com.amazonaws.services.s3.model.S3ObjectSummary;
 import com.mindtree.transformer.TransformerApp;
+import com.mindtree.transformer.service.AbstractStorage;
+import com.mindtree.transformer.service.AppContext;
 import com.mindtree.transformer.service.IStorage;
-import com.mindtree.utils.exception.MigratorServiceException;
-import com.mindtree.utils.helper.MigrationUtils;
-import com.mindtree.utils.helper.MigrationUtils.AppVariables;
+import com.mindtree.transformer.service.MigratorServiceException;
+import com.mindtree.transformer.service.AppContext.AppVariables;
+import com.mindtree.utils.constants.MigratorConstants;
+import com.mindtree.utils.helper.BusinessRulesUtil;
+import com.mindtree.utils.helper.MigrationUtil;
 
 /**
  * @author M1003467
  *
  */
-public class S3Storage implements IStorage {
+public class S3Storage extends AbstractStorage{
 	
 	static final Logger LOGGER = LoggerFactory.getLogger(S3Storage.class);
 	
 	private AmazonS3 s3Client;
 
-	private AppVariables appVars = MigrationUtils.getAppVariables();
-	
 	@Override
 	public IStorage connect() throws MigratorServiceException {
 		// TODO Auto-generated method stub
 		try {
 			if (null == s3Client) {
 				
-				AWSCredentials credentials = new BasicAWSCredentials(appVars.awsKey, appVars.awsSecret);
+				AWSCredentials credentials = new BasicAWSCredentials(appVars.storageKey, appVars.storageSecret);
 				LOGGER.info("creating new AWS instance");
 				s3Client = AmazonS3ClientBuilder.standard().withClientConfiguration(new ClientConfiguration())
 						.withCredentials(new AWSStaticCredentialsProvider(credentials)).withRegion(Regions.US_EAST_2)
@@ -76,26 +96,52 @@ public class S3Storage implements IStorage {
 	}
 
 	@Override
-	public String getFileContent(String bucketName, String path) {
+	public String getFileContent(String path) {
 		LOGGER.info("S3Storage: getFileContent :XMP path/key:{}", path);
 		
-		return s3Client.getObjectAsString(bucketName, path);
+		return s3Client.getObjectAsString(appVars.bucketName, path);
 	}
 
 	@Override
 	public File getFile(String folder, String fileName) {
-		// TODO Auto-generated method stub
-		return null;
+		File file = null;
+		String devMigrationBucketName = "";
+		try {
+
+			devMigrationBucketName = AppContext.getAppConfig().getProperty(
+					"migrator.dev.asset.migration.bucket.name");
+			S3Object s3object = s3Client.getObject(new GetObjectRequest(devMigrationBucketName, 
+					folder + fileSeparator() + fileName));
+			try (InputStream inputStream = s3object.getObjectContent()) {
+				file = File.createTempFile("s3test", "");
+				try (FileOutputStream outputStream = new FileOutputStream(file)) {
+					int read;
+					byte[] bytes = new byte[1024];
+					while ((read = inputStream.read(bytes)) != -1) {
+						outputStream.write(bytes, 0, read);
+					}
+				}
+			}
+
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		return file;
 	}
 
 	@Override
-	public Map<String, Long> getFileSizes(String bucketName, String folderKey) {
-		LOGGER.info("S3Storage : getFileSizeFromS3 : Getting Assets from S3 : bucketName :{} Folder key:{}",
-				bucketName, folderKey);
+	public Map<String, Long> getFileSizes(String folder) {
+
 
 		ListObjectsRequest listObjectsRequest = null;
-		if (folderKey != null && !folderKey.isEmpty()) {
-			listObjectsRequest = new ListObjectsRequest().withBucketName(bucketName).withPrefix(folderKey + "/").withEncodingType("url");;
+		
+		String bucketName = appVars.bucketName;
+		LOGGER.info("S3Storage : getFileSizeFromS3 : Getting Assets from S3 : bucketName :{} Folder key:{}",
+				bucketName, folder);
+		
+		if (folder != null && !folder.isEmpty()) {
+			listObjectsRequest = new ListObjectsRequest().withBucketName(bucketName).withPrefix(folder + "/").withEncodingType("url");;
 		} else {
 			listObjectsRequest = new ListObjectsRequest().withBucketName(bucketName).withEncodingType("url");;
 
@@ -124,15 +170,69 @@ public class S3Storage implements IStorage {
 	}
 
 	@Override
-	public void replicateAsAEM(StringBuilder brandPrefix, String src, String dst) {
+	public void replicateAsAEM(String brandPrefix, String src, String dst) {
 		// TODO Auto-generated method stub
+		Properties prop = null;
+		String srcFolder = null;
+		String dstFolder = null;
+		String mimeType = null;
+		try {
+			prop = AppContext.getAppConfig();
+			srcFolder = prop.getProperty(brandPrefix + MigratorConstants.S3_SOURCE_BUCKET_NAME);
+			dstFolder = prop.getProperty(brandPrefix + MigratorConstants.S3_DESTINATION_BUCKET_NAME);
+
+			LOGGER.info("-------------S3 Replication Start----------------");
+			LOGGER.info("AppContext replicateS3AsAEM :srcBucket:{} - src:{}", srcFolder, src);
+			LOGGER.info("AppContext replicateS3AsAEM :dstBucket:{} - dst:{}", dstFolder, dst);
+
+			String fileExtension = MigrationUtil.getFileExtension(src);
+
+			if (!fileExtension.isEmpty() && BusinessRulesUtil.MimeTypeMap != null
+					&& BusinessRulesUtil.MimeTypeMap.size() > 0
+					&& BusinessRulesUtil.MimeTypeMap.containsKey(fileExtension.toLowerCase())) {
+				mimeType = BusinessRulesUtil.MimeTypeMap.get(fileExtension.toLowerCase());
+			}
+
+			s3MultiPartUpload(srcFolder, dstFolder, src, dst, mimeType);
+		} catch (AmazonS3Exception ase) {
+			LOGGER.error(
+					"AppContext : replicateS3AsAEM : S3 replication failed :AmazonS3Exception : {} : Src Key:{}",
+					ase, src);
+			src = trySecondAttemptToUpload(src, dst, srcFolder, dstFolder, mimeType);
+		} catch (AmazonServiceException ase) {
+			LOGGER.error(
+					"AppContext : replicateS3AsAEM : S3 replication failed :AmazonServiceException : {}: Src Key:{}",
+					ase, src);
+		} catch (AmazonClientException ace) {
+			LOGGER.error(
+					"AppContext : replicateS3AsAEM : S3 replication failed :AmazonClientException : {} : Src Key:{}",
+					ace, src);
+		} catch (Exception e) {
+			LOGGER.error("AppContext : replicateS3AsAEM : S3 replication failed :Exception : {} : Src Key:{}", e,
+					src);
+		}
+		LOGGER.info("-------------S3 Replication End----------------");
 
 	}
 
 	@Override
 	public void uploadToStore(File file, String migrationCSVReportName) {
-		// TODO Auto-generated method stub
+		Format formatter = new SimpleDateFormat("yyyy-MM-dd_hh-mm-ss");
+		String dateString = formatter.format(new Date());
 
+		String devMigrationBucketName = appVars.bucketName;
+		String devMigrationReportPath = AppContext.getAppConfig().getProperty(
+				"migrator.asset.migration.report.path");
+
+		LOGGER.info("Uploading a new object to S3 from a file\n");
+		if (file != null) {
+			String fileName = migrationCSVReportName.split("\\.")[0];
+			String extn = migrationCSVReportName.split("\\.")[1];
+
+			PutObjectResult res = s3Client.putObject(new PutObjectRequest(devMigrationBucketName, devMigrationReportPath
+					+ "/" + fileName.concat("." + dateString).concat("." + extn), file));
+			LOGGER.info("PutObjectResult res:{}", res);
+		}
 	}
 
 	@Override
@@ -141,11 +241,11 @@ public class S3Storage implements IStorage {
 			return null;
 		}
 		// TODO Auto-generated method stub
-		LOGGER.info("Config Bucket name : " + appVars.configBucketName);
+		LOGGER.info("Config Bucket name : " + appVars.bucketName);
 		String fileKey = appVars.configFolder + "/" + "config.properties";
 		LOGGER.info("Config fileKey : " + fileKey);
 		Properties prop = new Properties();
-		S3Object s3object = s3Client.getObject(new GetObjectRequest(appVars.configBucketName, fileKey));
+		S3Object s3object = s3Client.getObject(new GetObjectRequest(appVars.bucketName, fileKey));
 		try (S3ObjectInputStream s3ObjectInputStream = s3object.getObjectContent()) {
 			prop.load(s3ObjectInputStream);
 			LOGGER.info("Propp size : " + prop.size());
@@ -156,10 +256,103 @@ public class S3Storage implements IStorage {
 		return prop;
 	}
 
-	@Override
-	public Object getNativeClient() {
-		// TODO Auto-generated method stub
-		return s3Client;
+	private void s3MultiPartUpload(String sourceFolder, String targetFolder, String sourceFile,
+			String targetFile, String mimeType) {
+		List<CopyPartResult> copyResponses = new ArrayList<CopyPartResult>();
+
+		ObjectMetadata metadata = new ObjectMetadata();
+		if (mimeType != null) {
+			metadata.setContentType(mimeType);
+		}
+
+		InitiateMultipartUploadRequest initiateRequest = new InitiateMultipartUploadRequest(targetFolder,
+				targetFile, metadata);
+
+		InitiateMultipartUploadResult initResult = s3Client.initiateMultipartUpload(initiateRequest);
+
+		// Get object size.
+		GetObjectMetadataRequest metadataRequest = new GetObjectMetadataRequest(sourceFolder, sourceFile);
+
+		ObjectMetadata metadataResult = s3Client.getObjectMetadata(metadataRequest);
+		long objectSize = metadataResult.getContentLength(); // in bytes
+
+		// Copy parts.
+		long partSize = 4096 * (long) Math.pow(2.0, 20.0); // 4 GB
+
+		long bytePosition = 0;
+
+		LOGGER.info("AppContext replicateS3AsAEM s3MultiPartUpload :src : {}  -  objectSize:{}", sourceFile,
+				objectSize);
+		for (int i = 1; bytePosition < objectSize; i++) {
+			CopyPartRequest copyRequest = new CopyPartRequest()
+					.withDestinationBucketName(targetFolder)
+					.withDestinationKey(targetFile)
+					.withSourceBucketName(sourceFolder)
+					.withSourceKey(sourceFile)
+					.withUploadId(initResult.getUploadId())
+					.withFirstByte(bytePosition)
+					.withLastByte(
+							bytePosition + partSize - 1 >= objectSize ? objectSize - 1 : bytePosition + partSize - 1)
+					.withPartNumber(i);
+
+			copyResponses.add(s3Client.copyPart(copyRequest));
+			bytePosition += partSize;
+
+		}
+		CompleteMultipartUploadRequest completeRequest = new CompleteMultipartUploadRequest(targetFolder,
+				targetFile, initResult.getUploadId(), GetETags(copyResponses));
+		CompleteMultipartUploadResult completeUploadResponse = s3Client.completeMultipartUpload(completeRequest);
+		LOGGER.info("AppContext replicateS3AsAEM s3MultiPartUpload :CopyObjectResult:{}", completeUploadResponse);
 	}
+	
+	private String trySecondAttemptToUpload(String src, String dst, String srcFolder, String dstFolder, String mimeType) {
+		try {
+			String[] filename = src.split("\\.");
+			if (filename.length > 1) {
+				if (isLowerCase(filename[1])) {
+					src = src.toUpperCase();
+				} else {
+					src = src.toLowerCase();
+				}
+				s3MultiPartUpload(srcFolder, dstFolder, src, dst, mimeType);
+			}
+
+		} catch (Exception e) {
+			LOGGER.error(
+					"AppContext : replicateS3AsAEM : S3 replication failed :Exception(2nd Attempt) : {} : Src Key:{}",
+					e, src);
+		}
+		return src;
+	}
+
+	// Helper function that constructs ETags.
+	private List<PartETag> GetETags(List<CopyPartResult> responses) {
+		List<PartETag> etags = new ArrayList<PartETag>();
+		for (CopyPartResult response : responses) {
+			etags.add(new PartETag(response.getPartNumber(), response.getETag()));
+		}
+		return etags;
+	}
+
+	private boolean isLowerCase(String s) {
+		for (int i = 0; i < s.length(); i++) {
+			if (Character.isAlphabetic(s.charAt(i)) && !Character.isLowerCase(s.charAt(i))) {
+				return false;
+			}
+		}
+		return true;
+	}
+
+	@Override
+	public String getFileName(String path) {
+		return this.getName(path, '/');
+	}
+
+	@Override
+	public char fileSeparator() {
+		// TODO Auto-generated method stub
+		return '/';
+	}
+
 
 }

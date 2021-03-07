@@ -13,9 +13,10 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.amazonaws.services.s3.AmazonS3;
+import com.mindtree.transformer.service.AppContext;
+import com.mindtree.transformer.service.MigratorServiceException;
 import com.mindtree.utils.constants.MigratorConstants;
-import com.mindtree.utils.exception.MigratorServiceException;
-import com.mindtree.utils.helper.MigrationUtils;
+import com.mindtree.utils.helper.MigrationUtil;
 import com.mindtree.utils.helper.ReadExcel;
 
 /**
@@ -51,8 +52,6 @@ public class HoloxoReqConfigurationLoader {
 	public static int rowIndex = 0;
 	public static int maxCell = 0;
 	
-	private static AmazonS3 s3Client = (AmazonS3) MigrationUtils.getStorageClient();
-
 	/**
 	 * Default Constructor
 	 */
@@ -65,15 +64,15 @@ public class HoloxoReqConfigurationLoader {
 		Properties prop;
 		FileInputStream file = null;
 		try {
-			prop = MigrationUtils.getPropValues();
+			prop = AppContext.getAppConfig();
 			brandAbbreviation = "HX";
 			LOGGER.info("holoxoReqConfigurationLoader : current brand "+brandAbbreviation);
-			StringBuilder brandPrefix = MigrationUtils.prepareBrandPrefix(brandAbbreviation);
-			String devMigrationConfigPath = MigrationUtils.getPropValues().getProperty(MigratorConstants.DEV_ASSET_MIG_CONFIG_PATH);
+			StringBuilder brandPrefix = MigrationUtil.prepareBrandPrefix(brandAbbreviation);
+			String devMigrationConfigPath = AppContext.getAppConfig().getProperty(MigratorConstants.DEV_ASSET_MIG_CONFIG_PATH);
 			String brandConfigFile = prop.getProperty(brandPrefix + "" + MigratorConstants.BRAND_REQ_CONFIGURATION_FILENAME);
 		//	file = new FileInputStream(new File(brandConfigFile));
 			//XSSFWorkbook workbook = new XSSFWorkbook(file);
-			XSSFWorkbook workbook = ReadExcel.getExcelWorkbook(s3Client, brandConfigFile, devMigrationConfigPath+"/"+brandAbbreviation);
+			XSSFWorkbook workbook = ReadExcel.getExcelWorkbook(brandConfigFile, devMigrationConfigPath+"/"+brandAbbreviation);
 			
 			workbook.forEach(sheet -> {
 				if (sheet.getSheetName().equals(sheet.getSheetName()))

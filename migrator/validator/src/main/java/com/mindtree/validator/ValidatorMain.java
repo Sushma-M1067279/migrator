@@ -5,8 +5,8 @@ import java.util.Properties;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.mindtree.utils.exception.MigratorServiceException;
-import com.mindtree.utils.helper.MigrationUtils;
+import com.mindtree.transformer.service.AppContext;
+import com.mindtree.transformer.service.MigratorServiceException;
 import com.mindtree.validator.service.IValidatorService;
 import com.mindtree.validator.service.impl.ValidatorServiceImpl;
 
@@ -36,15 +36,9 @@ public class ValidatorMain {
 
 	public static void main(String[] args) {
 		LOG.debug("Valiadator app is starting..");
-		boolean initSuccess = MigrationUtils.initializeConfig();
+		boolean initSuccess = AppContext.initializeConfig();
 		Properties prop = null;
-		try {
-			prop = MigrationUtils.getPropValues();
-		} catch (MigratorServiceException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-			return;
-		}
+		prop = AppContext.getAppConfig();
 		if (args != null && args.length > 0) {
 			sourceAbbreviation = args[0];
 		} else {

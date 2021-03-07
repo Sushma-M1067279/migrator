@@ -1,6 +1,7 @@
 package com.mindtree.bluenoid.rules;
 
 import com.mindtree.models.vo.DriveBasedMetadataRuleVO;
+import com.mindtree.transformer.service.AppContext;
 import com.mindtree.utils.constants.MigratorConstants;
 import com.mindtree.utils.service.AbstractDriveBasedRule;
 
@@ -17,7 +18,7 @@ public class BluenoidDefaultMetadataRule extends AbstractDriveBasedRule {
 		 */
 		
 		String assetPath = ruleVO.s3Asset.getKey().trim();
-		String fileName = assetPath.substring(assetPath.lastIndexOf('/') + 1, assetPath.length()).trim();
+		String fileName = AppContext.getStorage().getFileName(assetPath);
 		ruleVO.assetMetadataMap.put(MigratorConstants.EXCEL_COLUMN_DRIVE_PATH, assetPath);
 		if (fileName.startsWith(MigratorConstants.SPECIAL_CHARACTER_SINGLE_HASH)) {
 			fileName = fileName.replaceFirst("#", "");

@@ -150,10 +150,6 @@
 		                                        <include>local.settings.json</include>
 		                                    </includes>
 		                                </resource>
-		                                <resource>
-		                                	<directory>${project.build.directory}</directory>
-		                                	<includes><include>*.jar</include></includes>
-		                                </resource>
 		                            </resources>
 		                        </configuration>
 		                    </execution>

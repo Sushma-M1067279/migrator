@@ -33,7 +33,6 @@ import com.amazonaws.services.s3.model.PutObjectResult;
 import com.amazonaws.services.s3.model.S3Object;
 import com.amazonaws.services.s3.model.S3ObjectInputStream;
 import com.amazonaws.services.s3.model.S3ObjectSummary;
-import com.mindtree.transformer.service.AbstractStorage;
 import com.mindtree.transformer.service.AppContext;
 import com.mindtree.transformer.service.IStorage;
 import com.mindtree.transformer.service.MigratorServiceException;

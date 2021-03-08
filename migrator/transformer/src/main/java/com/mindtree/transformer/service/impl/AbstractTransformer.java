@@ -1,7 +1,10 @@
 /**
  * 
  */
-package com.mindtree.transformer.service;
+package com.mindtree.transformer.service.impl;
+
+import com.mindtree.transformer.service.IStorage;
+import com.mindtree.transformer.service.ITransformer;
 
 /**
  * @author AdobeDay2

@@ -45,7 +45,7 @@
 		<!-- Model -->
 		<dependency>
 			<groupId>com.mindtree</groupId>
-			<artifactId>models</artifactId>
+			<artifactId>core</artifactId>
 			<version>1.0-SNAPSHOT</version>
 		</dependency>
 

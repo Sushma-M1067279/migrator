@@ -9,9 +9,9 @@ import java.util.ResourceBundle;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.mindtree.transformer.service.AbstractTransformer;
 import com.mindtree.transformer.service.IStorage;
 import com.mindtree.transformer.service.ITransformer;
+import com.mindtree.transformer.service.impl.AbstractTransformer;
 
 /**
  * @author M1032046

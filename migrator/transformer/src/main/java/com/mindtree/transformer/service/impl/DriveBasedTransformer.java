@@ -14,7 +14,6 @@ import org.slf4j.LoggerFactory;
 import com.amazonaws.services.s3.AmazonS3;
 import com.mindtree.models.dto.BrandMasterMappingDto;
 import com.mindtree.transformer.factory.MigratorBusinessFactory;
-import com.mindtree.transformer.service.AbstractTransformer;
 import com.mindtree.transformer.service.AppContext;
 import com.mindtree.transformer.service.ITransformer;
 import com.mindtree.transformer.service.MigratorServiceException;

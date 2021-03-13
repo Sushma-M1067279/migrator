@@ -132,7 +132,7 @@ public class MigrationReportUtil {
 					+ MigratorConstants.MIGRATION_RENDITION_TARGET_PATH);
 
 			String s3ReplicationFlag = prop.getProperty(brandPrefix + ""
-					+ MigratorConstants.MIGRATION_S3_REPLICATION_ON_OFF_FLAG);
+					+ MigratorConstants.MIGRATION_STORAGE_REPLICATION_ON_OFF_FLAG);
 
 			String migrationType = prop.getProperty(brandPrefix + "" + MigratorConstants.BRAND_ASSET_MIGRATION_TYPE);
 
@@ -408,7 +408,7 @@ public class MigrationReportUtil {
 		Pattern pt = Pattern.compile("[^a-zA-Z0-9._/\\p{L}]");
 		String sep = "/"; 
 
-		String fileName = path.substring(path.lastIndexOf(sep)); //AppContext.getStorage().getFileName(path);
+		String fileName = path.substring(path.lastIndexOf(sep)+1); //AppContext.getStorage().getFileName(path);
 		String updatedFileName = replaceSpecialCharacters(pt, fileName, MigratorConstants.FILE_NAME);
 
 		path = path.substring(0, path.lastIndexOf(sep));
@@ -728,7 +728,7 @@ public class MigrationReportUtil {
 //		try {
 //			prop = AppContext.getPropValues();
 //			srcBucket = prop.getProperty(brandPrefix + "" + MigratorConstants.S3_SOURCE_BUCKET_NAME);
-//			dstBucket = prop.getProperty(brandPrefix + "" + MigratorConstants.S3_DESTINATION_BUCKET_NAME);
+//			dstBucket = prop.getProperty(brandPrefix + "" + MigratorConstants.STORAGE_DESTINATION_BUCKET_FOLDER);
 //
 //			LOGGER.info("-------------S3 Replication Start----------------");
 //			LOGGER.info("AppContext replicateS3AsAEM :srcBucket:{} - src:{}", srcBucket, src);

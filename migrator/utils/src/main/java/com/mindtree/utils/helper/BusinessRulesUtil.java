@@ -64,7 +64,7 @@ public class BusinessRulesUtil {
 	private static void fillDefaultMDDataTypeMap(String masterBrandMappingFileName, String defaultMDSheetName)
 			throws MigratorServiceException {
 		XSSFSheet assetSheet = null;
-		String devMigrationConfigPath = AppContext.getAppConfig().getProperty(MigratorConstants.DEV_ASSET_MIG_CONFIG_PATH);
+		String devMigrationConfigPath = AppContext.getAppVariables().configFolder;
 		assetSheet = ReadExcel.getExcelSheet(masterBrandMappingFileName, defaultMDSheetName, devMigrationConfigPath);
 		Iterator<Row> rowIterator = assetSheet.iterator();
 		while (rowIterator.hasNext()) {
@@ -91,7 +91,7 @@ public class BusinessRulesUtil {
 	private static void loadMimeTypeMap(String masterBrandMappingFileName, String sheetname)
 			throws MigratorServiceException {
 		XSSFSheet assetSheet = null;
-		String devMigrationConfigPath = AppContext.getAppConfig().getProperty(MigratorConstants.DEV_ASSET_MIG_CONFIG_PATH);
+		String devMigrationConfigPath = AppContext.getAppVariables().configFolder;
 		assetSheet = ReadExcel.getExcelSheet(masterBrandMappingFileName, sheetname, devMigrationConfigPath);
 		Iterator<Row> rowIterator = assetSheet.iterator();
 		while (rowIterator.hasNext()) {
@@ -127,7 +127,7 @@ public class BusinessRulesUtil {
 	private static void fillNameSpaceSet(String masterBrandMappingFileName, String nameSpaceFileName)
 			throws MigratorServiceException {
 		XSSFSheet assetSheet = null;
-		String devMigrationConfigPath = AppContext.getAppConfig().getProperty(MigratorConstants.DEV_ASSET_MIG_CONFIG_PATH);
+		String devMigrationConfigPath = AppContext.getAppVariables().configFolder;
 		assetSheet = ReadExcel.getExcelSheet(masterBrandMappingFileName, nameSpaceFileName, devMigrationConfigPath);
 		Iterator<Row> rowIterator = assetSheet.iterator();
 		while (rowIterator.hasNext()) {
@@ -150,7 +150,7 @@ public class BusinessRulesUtil {
 	private static void fillUsageMap(String masterBrandMappingFileName, String usageMappingFileName)
 			throws MigratorServiceException {
 		XSSFSheet assetSheet = null;
-		String devMigrationConfigPath = AppContext.getAppConfig().getProperty(MigratorConstants.DEV_ASSET_MIG_CONFIG_PATH);
+		String devMigrationConfigPath = AppContext.getAppVariables().configFolder;
 		assetSheet = ReadExcel.getExcelSheet(masterBrandMappingFileName, usageMappingFileName, devMigrationConfigPath);
 		Iterator<Row> rowIterator = assetSheet.iterator();
 		while (rowIterator.hasNext()) {

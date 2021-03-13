@@ -66,6 +66,7 @@ public class DAMBasedTransformer extends AbstractTransformer {
 	private String folderPath = null;
 	private IMigratorBusiness migratorBusiness = null;
 	Map<String, Integer> csvHeaderMap = new HashMap<>();
+	private String sourceFolder = null;
 
 	/**
 	 * The transform holds the logic to transform Excel, XMP and folder specific
@@ -98,10 +99,12 @@ public class DAMBasedTransformer extends AbstractTransformer {
 					+ MigratorConstants.BRAND_ASSET_DUMP_PROCESS_COUNT));
 			lastProcessedAssetByInterruption = prop.getProperty(brandPrefix + ""
 					+ MigratorConstants.BRAND_MIGRATION_FAILURE_LAST_PROCESSED_ID);
+			
 			HoloxoMetadataUtil.brandPrefix = brandPrefix.toString();
 
 			brand = prop.getProperty(brandPrefix + "" + MigratorConstants.BRAND);
 			folderPath = prop.getProperty(brandPrefix + "" + MigratorConstants.XMP_TRANSFORMATION_PATH);
+			sourceFolder = prop.getProperty(brandPrefix + "" + MigratorConstants.STORAGE_SOURCE_BUCKET_FOLDER);
 
 			migratorBusiness = ApplicationFactory.getMigratorBusiness(brandAbbreviation);
 
@@ -427,7 +430,9 @@ public class DAMBasedTransformer extends AbstractTransformer {
 			}
 
 		}
-		assetMetadataMap.put(MigratorConstants.CSV_IMPORTER_COLUMN_SRC_REL_PATH, fileName);
+		
+		assetMetadataMap.put(MigratorConstants.CSV_IMPORTER_COLUMN_SRC_REL_PATH, 
+				this.sourceFolder + AppContext.getStorage().fileSeparator() + fileName);
 
 		// apply brand specific folder rules
 		if (migratorBusiness != null) {

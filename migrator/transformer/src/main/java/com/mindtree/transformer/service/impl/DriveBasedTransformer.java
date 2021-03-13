@@ -76,7 +76,7 @@ public class DriveBasedTransformer extends AbstractTransformer {
 			
 			LOGGER.info("DriveBasedTransformer transform : brandPrefix:{}", brandPrefix);
 			LOGGER.info("DriveBasedTransformer transform : prop size:{}", prop.size());
-			String srcFolder = prop.getProperty(brandPrefix + MigratorConstants.S3_SOURCE_BUCKET_FOLDER);
+			String srcFolder = prop.getProperty(brandPrefix + MigratorConstants.STORAGE_SOURCE_BUCKET_FOLDER);
 
 			Map<String, Long> fileSizes = storage.getFileSizes(srcFolder);
 			LOGGER.info("DriveBasedTransformer transform : Assets size::{}", fileSizes.size());

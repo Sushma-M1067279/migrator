@@ -162,8 +162,8 @@ public class BlobStorage extends AbstractStorage {
 
 		try {
 			prop = AppContext.getAppConfig();
-			srcFolder = prop.getProperty(brandPrefix + MigratorConstants.S3_SOURCE_BUCKET_NAME);
-			dstFolder = prop.getProperty(brandPrefix + MigratorConstants.S3_DESTINATION_BUCKET_NAME);
+			srcFolder = prop.getProperty(brandPrefix + MigratorConstants.STORAGE_SOURCE_BUCKET_FOLDER);
+			dstFolder = prop.getProperty(brandPrefix + MigratorConstants.STORAGE_DESTINATION_BUCKET_FOLDER);
 
 			LOGGER.info("-------------Replication Start----------------");
 			LOGGER.info("LocalStorage replicateAsAEM :srcFolder:{} - src:{}", srcFolder, src);

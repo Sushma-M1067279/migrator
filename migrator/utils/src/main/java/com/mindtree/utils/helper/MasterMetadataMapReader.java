@@ -46,7 +46,7 @@ public class MasterMetadataMapReader {
 
 		XSSFSheet assetSheet = null;
 		try {
-			String devMigrationConfigPath = AppContext.getAppConfig().getProperty(MigratorConstants.DEV_ASSET_MIG_CONFIG_PATH);
+			String devMigrationConfigPath = AppContext.getAppVariables().configFolder;
 			// Read master metadata mapping from S3
 			assetSheet = ReadExcel.getExcelSheet(fileName, sheetName, devMigrationConfigPath);
 			LOGGER.info("sheet: "+ assetSheet.getSheetName());

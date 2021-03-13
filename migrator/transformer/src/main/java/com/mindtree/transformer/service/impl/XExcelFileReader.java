@@ -65,8 +65,7 @@ public class XExcelFileReader implements IDataFileReader {
 		try {
 
 			LOGGER.info("XExcelFileReader : Reading file from S3:{}", excelPath);
-			String devMigrationConfigPath = AppContext.getAppConfig().getProperty(
-					MigratorConstants.DEV_ASSET_MIG_CONFIG_PATH);
+			String devMigrationConfigPath = AppContext.getAppVariables().configFolder;
 			File localFile = AppContext.getStorage().getFile(
 					devMigrationConfigPath+ AppContext.getStorage().fileSeparator() +brandAbbreviation, excelPath);
 			opcPkg = OPCPackage.open(localFile.getAbsolutePath(), PackageAccess.READ);

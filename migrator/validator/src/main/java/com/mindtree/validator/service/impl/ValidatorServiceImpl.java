@@ -191,7 +191,7 @@ public class ValidatorServiceImpl implements IValidatorService {
 
 		XSSFSheet assetSheet = null;
 		try {
-			String s3Folder = prop.getProperty("migrator.dev.asset.migration.config.path");
+			String s3Folder = AppContext.getAppVariables().configFolder;
 			assetSheet = ReadExcel.getExcelSheet(fileName, sheetName, s3Folder);
 			LOGGER.info("Validator: { getAllAssetsFromExcel : fileName - {}, sheetName - {}, s3Folder - {}", fileName,
 					sheetName, s3Folder);

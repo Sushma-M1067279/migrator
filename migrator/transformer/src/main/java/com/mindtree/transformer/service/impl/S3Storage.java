@@ -107,8 +107,7 @@ public class S3Storage extends AbstractStorage{
 		String devMigrationBucketName = "";
 		try {
 
-			devMigrationBucketName = AppContext.getAppConfig().getProperty(
-					"migrator.dev.asset.migration.bucket.name");
+			devMigrationBucketName = appVars.bucketName;
 			S3Object s3object = s3Client.getObject(new GetObjectRequest(devMigrationBucketName, 
 					folder + fileSeparator() + fileName));
 			try (InputStream inputStream = s3object.getObjectContent()) {
@@ -177,8 +176,10 @@ public class S3Storage extends AbstractStorage{
 		String mimeType = null;
 		try {
 			prop = AppContext.getAppConfig();
-			srcFolder = prop.getProperty(brandPrefix + MigratorConstants.S3_SOURCE_BUCKET_NAME);
-			dstFolder = prop.getProperty(brandPrefix + MigratorConstants.S3_DESTINATION_BUCKET_NAME);
+			srcFolder = prop.getProperty(brandPrefix + MigratorConstants.STORAGE_SOURCE_BUCKET_FOLDER);
+			srcFolder = appVars.bucketName+ fileSeparator() + srcFolder;
+			dstFolder = prop.getProperty(brandPrefix + MigratorConstants.STORAGE_DESTINATION_BUCKET_FOLDER);
+			dstFolder = appVars.bucketName+ fileSeparator() + dstFolder;
 
 			LOGGER.info("-------------S3 Replication Start----------------");
 			LOGGER.info("AppContext replicateS3AsAEM :srcBucket:{} - src:{}", srcFolder, src);
@@ -192,12 +193,12 @@ public class S3Storage extends AbstractStorage{
 				mimeType = BusinessRulesUtil.MimeTypeMap.get(fileExtension.toLowerCase());
 			}
 
-			s3MultiPartUpload(srcFolder, dstFolder, src, dst, mimeType);
+			s3MultiPartUpload(appVars.bucketName, dstFolder, src, dst, mimeType);
 		} catch (AmazonS3Exception ase) {
 			LOGGER.error(
 					"AppContext : replicateS3AsAEM : S3 replication failed :AmazonS3Exception : {} : Src Key:{}",
 					ase, src);
-			src = trySecondAttemptToUpload(src, dst, srcFolder, dstFolder, mimeType);
+			src = trySecondAttemptToUpload(src, dst, appVars.bucketName, dstFolder, mimeType);
 		} catch (AmazonServiceException ase) {
 			LOGGER.error(
 					"AppContext : replicateS3AsAEM : S3 replication failed :AmazonServiceException : {}: Src Key:{}",

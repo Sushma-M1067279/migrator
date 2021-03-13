@@ -104,20 +104,22 @@ public class LocalStorage extends AbstractStorage {
 	public void replicateAsAEM(String brandPrefix, String src, String dst) {
 
 		Properties prop = null;
-		String srcBucket = null;
-		String dstBucket = null;
+		String srcFolder = null;
+		String dstFolder = null;
 		String mimeType = null;
 		try {
 			prop = AppContext.getAppConfig();
-			srcBucket = prop.getProperty(brandPrefix + MigratorConstants.S3_SOURCE_BUCKET_NAME);
-			dstBucket = prop.getProperty(brandPrefix + MigratorConstants.S3_DESTINATION_BUCKET_NAME);
+			srcFolder = prop.getProperty(brandPrefix + MigratorConstants.STORAGE_SOURCE_BUCKET_FOLDER);
+			srcFolder = appVars.bucketName+ fileSeparator() + srcFolder;
+			dstFolder = prop.getProperty(brandPrefix + MigratorConstants.STORAGE_DESTINATION_BUCKET_FOLDER);
+			dstFolder = appVars.bucketName+ fileSeparator() + dstFolder;
 
 			LOGGER.info("-------------Replication Start----------------");
-			LOGGER.info("LocalStorage replicateAsAEM :srcBucket:{} - src:{}", srcBucket, src);
-			LOGGER.info("LocalStorage replicateAsAEM :dstBucket:{} - dst:{}", dstBucket, dst);
+			LOGGER.info("LocalStorage replicateAsAEM :srcBucket:{} - src:{}", srcFolder, src);
+			LOGGER.info("LocalStorage replicateAsAEM :dstBucket:{} - dst:{}", dstFolder, dst);
 			
-			File srcFile = new File(srcBucket + fileSeparator() + src);
-			File destFile = new File(dstBucket + fileSeparator() + dst);
+			File srcFile = new File(appVars.bucketName + fileSeparator() + src);
+			File destFile = new File(dstFolder + fileSeparator() + dst);
 			destFile.getParentFile().mkdirs();
 			
 			FileUtils.copyFile(srcFile, destFile);

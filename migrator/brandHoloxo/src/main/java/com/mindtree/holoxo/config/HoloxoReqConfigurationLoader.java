@@ -68,7 +68,7 @@ public class HoloxoReqConfigurationLoader {
 			brandAbbreviation = "HX";
 			LOGGER.info("holoxoReqConfigurationLoader : current brand "+brandAbbreviation);
 			StringBuilder brandPrefix = MigrationUtil.prepareBrandPrefix(brandAbbreviation);
-			String devMigrationConfigPath = AppContext.getAppConfig().getProperty(MigratorConstants.DEV_ASSET_MIG_CONFIG_PATH);
+			String devMigrationConfigPath = AppContext.getAppVariables().configFolder;
 			String brandConfigFile = prop.getProperty(brandPrefix + "" + MigratorConstants.BRAND_REQ_CONFIGURATION_FILENAME);
 		//	file = new FileInputStream(new File(brandConfigFile));
 			//XSSFWorkbook workbook = new XSSFWorkbook(file);

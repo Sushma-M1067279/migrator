@@ -19,7 +19,7 @@ public final class MigratorConstants {
 
 	public static final String COLON = ":";
 	
-	public static final String DEV_ASSET_MIG_CONFIG_PATH = "migrator.dev.asset.migration.config.path";
+//	public static final String DEV_ASSET_MIG_CONFIG_PATH = "migrator.dev.asset.migration.config.path";
 	
 	public static final String CURRENT_BRAND_PROCESSING = "migrator.current.brand.procesing";
 
@@ -186,17 +186,17 @@ public final class MigratorConstants {
 
 	public static final String RENDITIONS_TARGET_KEY_STR = "renditions_target_path{{ String }}";
 
-	public static final String S3_SOURCE_BUCKET_NAME = "S3.source.bucket.name";
-	public static final String S3_SOURCE_BUCKET_FOLDER = "S3.source.bucket.folder";
+//	public static final String S3_SOURCE_BUCKET_NAME = "S3.source.bucket.name";
+	public static final String STORAGE_SOURCE_BUCKET_FOLDER = "storage.source.bucket.folder";
 
 
-	public static final String S3_DESTINATION_BUCKET_NAME = "S3.destination.bucket.name";
+	public static final String STORAGE_DESTINATION_BUCKET_FOLDER = "storage.destination.bucket.folder";
 
 	public static final String MIGRATION_CSV_REPORT_PATH = "migration.csv.report.path";
 
 	public static final String MIGRATION_SUMMARY_REPORT_PATH = "miration.summary.report.path";
 
-	public static final String MIGRATION_RENDITION_TARGET_PATH = "S3.renditions.target.path";
+	public static final String MIGRATION_RENDITION_TARGET_PATH = "storage.renditions.target.path";
 
 	public static final int COLUMN_ORIGINAL_FILE_NAME = 0;
 
@@ -328,7 +328,7 @@ public final class MigratorConstants {
 
 	public static final String AEM_DEFAULT_METADATA_TYPE_SHEETNAME = "migrator.metadata.datatype.sheetname";
 
-	public static final String MIGRATION_S3_REPLICATION_ON_OFF_FLAG = "S3.replication.on.off.flag";
+	public static final String MIGRATION_STORAGE_REPLICATION_ON_OFF_FLAG = "storage.replication.on.off.flag";
 
 	public static final String AEM_PROPERTY_CALENDAY_YEAR = "calendarSeasonYear{{String : multi}}";
 

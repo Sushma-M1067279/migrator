@@ -4,12 +4,16 @@ import java.util.Properties;
 
 import com.mindtree.bluenoid.util.MetadataUtil;
 import com.mindtree.models.vo.DriveBasedMetadataRuleVO;
-import com.mindtree.transformer.service.AppContext;
-import com.mindtree.transformer.service.MigratorServiceException;
+import com.mindtree.core.service.AppContext;
+import com.mindtree.core.service.MigratorServiceException;
 import com.mindtree.utils.constants.MigratorConstants;
 import com.mindtree.utils.service.AbstractDriveBasedRule;
 
 public class BluenoidProgramSubfolderMetadataRule extends AbstractDriveBasedRule {
+	
+	public BluenoidProgramSubfolderMetadataRule() {
+		
+	}
 
 	public BluenoidProgramSubfolderMetadataRule(DriveBasedMetadataRuleVO ruleVO) {
 		super(ruleVO);

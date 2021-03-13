@@ -6,6 +6,10 @@ import com.mindtree.utils.constants.MigratorConstants;
 import com.mindtree.utils.service.AbstractXLSMetadataRule;
 
 public class HoloxoCategoryRule extends AbstractXLSMetadataRule {
+	
+	public HoloxoCategoryRule() {
+		// TODO Auto-generated constructor stub
+	}
 
 
 	public HoloxoCategoryRule(XLSMetadataRuleVO ruleVo) {

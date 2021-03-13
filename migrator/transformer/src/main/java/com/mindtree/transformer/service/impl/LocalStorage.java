@@ -33,10 +33,10 @@ import com.amazonaws.services.s3.model.PutObjectResult;
 import com.amazonaws.services.s3.model.S3Object;
 import com.amazonaws.services.s3.model.S3ObjectInputStream;
 import com.amazonaws.services.s3.model.S3ObjectSummary;
-import com.mindtree.transformer.service.AppContext;
-import com.mindtree.transformer.service.IStorage;
-import com.mindtree.transformer.service.MigratorServiceException;
-import com.mindtree.transformer.service.AppContext.AppVariables;
+import com.mindtree.core.service.AppContext;
+import com.mindtree.core.service.IStorage;
+import com.mindtree.core.service.MigratorServiceException;
+import com.mindtree.core.service.AppContext.AppVariables;
 import com.mindtree.utils.constants.MigratorConstants;
 import com.mindtree.utils.helper.BusinessRulesUtil;
 

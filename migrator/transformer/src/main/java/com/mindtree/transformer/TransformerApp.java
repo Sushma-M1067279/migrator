@@ -6,11 +6,11 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.mindtree.transformer.factory.ApplicationFactory;
-import com.mindtree.transformer.service.AppContext;
-import com.mindtree.transformer.service.IStorage;
-import com.mindtree.transformer.service.ITransformer;
-import com.mindtree.transformer.service.MigratorServiceException;
-import com.mindtree.transformer.service.AppContext.AppVariables;
+import com.mindtree.core.service.AppContext;
+import com.mindtree.core.service.IStorage;
+import com.mindtree.core.service.ITransformer;
+import com.mindtree.core.service.MigratorServiceException;
+import com.mindtree.core.service.AppContext.AppVariables;
 import com.mindtree.transformer.service.impl.AbstractTransformer;
 
 public class TransformerApp {

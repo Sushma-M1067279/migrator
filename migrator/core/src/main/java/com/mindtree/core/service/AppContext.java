@@ -1,4 +1,4 @@
-package com.mindtree.transformer.service;
+package com.mindtree.core.service;
 
 import java.util.Properties;
 

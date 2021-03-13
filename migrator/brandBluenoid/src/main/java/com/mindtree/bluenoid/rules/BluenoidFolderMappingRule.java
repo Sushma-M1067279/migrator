@@ -6,6 +6,10 @@ import com.mindtree.utils.constants.MigratorConstants;
 import com.mindtree.utils.service.AbstractDriveBasedRule;
 
 public class BluenoidFolderMappingRule extends AbstractDriveBasedRule {
+	
+	public BluenoidFolderMappingRule() {
+		
+	}
 
 	public BluenoidFolderMappingRule(DriveBasedMetadataRuleVO ruleVO) {
 		super(ruleVO);

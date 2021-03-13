@@ -1,4 +1,4 @@
-package com.mindtree.transformer.service;
+package com.mindtree.core.service;
 
 import java.io.File;
 import java.util.HashMap;

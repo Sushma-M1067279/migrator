@@ -17,7 +17,6 @@ import java.util.Optional;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-// Invoke it using https://damtransformer.azurewebsites.net/api/migrator?brandcode=BN&transformationtype=drive&instance=1
 public class AzureTransformerHandler {
 	
 	static final Logger LOGGER = LoggerFactory.getLogger(AzureTransformerHandler.class);

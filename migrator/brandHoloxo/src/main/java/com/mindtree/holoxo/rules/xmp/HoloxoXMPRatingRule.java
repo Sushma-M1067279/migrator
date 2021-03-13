@@ -1,12 +1,16 @@
 package com.mindtree.holoxo.rules.xmp;
 
 import com.mindtree.models.vo.XMPMetadataRuleVO;
-import com.mindtree.transformer.service.AppContext;
+import com.mindtree.core.service.AppContext;
 import com.mindtree.utils.constants.MigratorConstants;
 import com.mindtree.utils.helper.MigrationUtil;
 import com.mindtree.utils.service.AbstractXMPMetadataRule;
 
 public class HoloxoXMPRatingRule extends AbstractXMPMetadataRule {
+	
+	public HoloxoXMPRatingRule() {
+		// TODO Auto-generated constructor stub
+	}
 
 	public HoloxoXMPRatingRule(XMPMetadataRuleVO ruleVO) {
 		super(ruleVO);

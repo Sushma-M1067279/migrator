@@ -9,6 +9,10 @@ import com.mindtree.utils.constants.MigratorConstants;
 import com.mindtree.utils.service.AbstractXLSMetadataRule;
 
 public class HoloxoOtherDropdownRule extends AbstractXLSMetadataRule {
+	
+	public HoloxoOtherDropdownRule() {
+		// TODO Auto-generated constructor stub
+	}
 
 	public HoloxoOtherDropdownRule(XLSMetadataRuleVO ruleVO) {
 		super(ruleVO);

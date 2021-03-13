@@ -13,8 +13,8 @@ import org.slf4j.LoggerFactory;
 
 import com.amazonaws.services.s3.AmazonS3;
 import com.mindtree.models.dto.BrandMasterMappingDto;
-import com.mindtree.transformer.service.AppContext;
-import com.mindtree.transformer.service.MigratorServiceException;
+import com.mindtree.core.service.AppContext;
+import com.mindtree.core.service.MigratorServiceException;
 import com.mindtree.utils.constants.MigratorConstants;
 
 /**

@@ -6,6 +6,10 @@ import com.mindtree.utils.constants.MigratorConstants;
 import com.mindtree.utils.service.AbstractXLSMetadataRule;
 
 public class HoloxoCountryRule extends AbstractXLSMetadataRule {
+	
+	public HoloxoCountryRule() {
+		// TODO Auto-generated constructor stub
+	}
 
 	public HoloxoCountryRule(XLSMetadataRuleVO ruleVO) {
 		super(ruleVO);

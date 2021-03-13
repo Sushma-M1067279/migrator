@@ -4,7 +4,7 @@ import java.util.Map;
 
 import com.mindtree.models.dto.BrandMasterMappingDto;
 
-public class XMPMetadataRuleVO {
+public class XMPMetadataRuleVO extends RuleVO {
 	public Map<String, BrandMasterMappingDto> masterMetadataMap;
 	public Map<String, String> assetMetadataMapFromXMP;
 	public String exportFlowFlag;

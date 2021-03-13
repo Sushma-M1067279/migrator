@@ -11,9 +11,9 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.mindtree.transformer.factory.ApplicationFactory;
-import com.mindtree.transformer.service.AppContext;
-import com.mindtree.transformer.service.IStorage;
-import com.mindtree.transformer.service.ITransformer;
+import com.mindtree.core.service.AppContext;
+import com.mindtree.core.service.IStorage;
+import com.mindtree.core.service.ITransformer;
 
 /**
  * This is the entry point for the transformation process.

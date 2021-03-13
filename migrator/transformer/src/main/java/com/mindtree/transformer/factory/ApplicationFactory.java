@@ -1,7 +1,9 @@
 package com.mindtree.transformer.factory;
 
+import java.util.ArrayList;
 import java.util.Enumeration;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.ResourceBundle;
@@ -9,9 +11,12 @@ import java.util.ResourceBundle;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.mindtree.transformer.service.IStorage;
-import com.mindtree.transformer.service.ITransformer;
+import com.mindtree.core.service.IMigratorBusiness;
+import com.mindtree.core.service.IRule;
+import com.mindtree.core.service.IStorage;
+import com.mindtree.core.service.ITransformer;
 import com.mindtree.transformer.service.impl.AbstractTransformer;
+import com.mindtree.core.service.IFilter;
 
 /**
  * @author M1032046
@@ -46,7 +51,7 @@ public class ApplicationFactory {
 	 * @return
 	 */
 	public static AbstractTransformer getTransformer(String transformationType) {
-        String className = brandsMappings.get(transformationType);
+        String className = brandsMappings.get("transformer."+transformationType);
  
         AbstractTransformer transformer = null;
  
@@ -68,7 +73,7 @@ public class ApplicationFactory {
 	 * @return
 	 */
 	public static IStorage getStorage(String storageType) {
-        String className = brandsMappings.get(storageType);
+        String className = brandsMappings.get("storage."+storageType);
  
         IStorage storage = null;
  
@@ -78,12 +83,89 @@ public class ApplicationFactory {
                 storage = (IStorage)cls.getDeclaredConstructor().newInstance();
             }
         } catch (Exception e) {
-        	LOGGER.error("ApplicationFactory :getStorage : Error While getting bean:{}"+e);
+        	LOGGER.error("ApplicationFactory :getStorage : Error While getting storage:{}"+e);
         }
  
         return storage;
     }
+
+	/**
+	 * This method returns migrator instance based on brand name.
+	 * @param migrator
+	 * @return
+	 */
+	public static IMigratorBusiness getMigratorBusiness(String brand) {
+        String className = brandsMappings.get("migrator."+brand);
  
+        IMigratorBusiness migrator = null;
+ 
+        try {
+            if( className!=null) {
+                Class cls = Class.forName(className);
+                migrator = (IMigratorBusiness) cls.getDeclaredConstructor().newInstance();
+                migrator.setFilters(getIFilters(brand));
+                migrator.setRules(getIRules(brand));
+                
+                LOGGER.info("Migrator loaded : "+ className);
+            }
+        } catch (Exception e) {
+        	LOGGER.error("ApplicationFactory :getMigratorBusiness : Error While getting migrator:{}"+e);
+        }
+ 
+        return migrator;
+    }
+	
+	private static List<IFilter> getIFilters(String brand) {
+		
+		String filter = "filter."+brand+".";
+		boolean loop = true; int i=1;
+		List<IFilter> filterList = new ArrayList<IFilter>();
+		
+		while(loop) {
+			String className = brandsMappings.get(filter + i++);
+			if(className == null) {
+				break;
+			}
+			 
+	        try {
+	        	IFilter filterCls = (IFilter) Class.forName(className).getDeclaredConstructor().newInstance();
+				LOGGER.info("Adding filter : "+className);
+				filterList.add(filterCls);
+	        } catch (Exception e) {
+	        	LOGGER.error("ApplicationFactory :getFilters : Error While getting filters:{}"+e);
+	        }
+			
+		}
+ 
+        return filterList;
+		
+	}
+
+	private static List<IRule> getIRules(String brand) {
+		
+		String rule = "rule."+brand+".";
+		int i=1;
+		List<IRule> ruleList = new ArrayList<IRule>();
+		
+		while(true) {
+			String className = brandsMappings.get(rule + i++);
+			if(className == null) {
+				break;
+			}
+			 
+	        try {
+	        	IRule ruleCls = (IRule) Class.forName(className).getDeclaredConstructor().newInstance();
+	        	LOGGER.info("Adding Rule : "+className);
+				ruleList.add(ruleCls);
+	        } catch (Exception e) {
+	        	LOGGER.error("ApplicationFactory :getRules : Error While getting rules :{}"+e);
+	        }
+			
+		}
+ 
+        return ruleList;
+		
+	}
 	/**
 	 * Loads Transformer configurations from property file.
 	 */

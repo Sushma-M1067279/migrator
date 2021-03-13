@@ -14,6 +14,10 @@ import com.mindtree.utils.service.AbstractXLSMetadataRule;
  */
 public class HoloxoMetadataFolderMappingRule extends AbstractXLSMetadataRule {
 	
+	public HoloxoMetadataFolderMappingRule() {
+		// TODO Auto-generated constructor stub
+	}
+	
 
 	public HoloxoMetadataFolderMappingRule(XLSMetadataRuleVO ruleVO) {
 		super(ruleVO);

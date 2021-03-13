@@ -1,4 +1,4 @@
-package com.mindtree.transformer.service;
+package com.mindtree.core.service;
 
 public class MigratorServiceException extends Exception {
 

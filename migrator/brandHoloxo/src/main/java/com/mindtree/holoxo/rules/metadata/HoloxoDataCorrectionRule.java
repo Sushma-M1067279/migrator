@@ -2,12 +2,16 @@ package com.mindtree.holoxo.rules.metadata;
 
 import com.mindtree.holoxo.config.HoloxoReqConfigurationLoader;
 import com.mindtree.models.vo.XLSMetadataRuleVO;
-import com.mindtree.transformer.service.AppContext;
+import com.mindtree.core.service.AppContext;
 import com.mindtree.utils.constants.MigratorConstants;
 import com.mindtree.utils.helper.MigrationUtil;
 import com.mindtree.utils.service.AbstractXLSMetadataRule;
 
 public class HoloxoDataCorrectionRule extends AbstractXLSMetadataRule {
+	
+	public HoloxoDataCorrectionRule() {
+		// TODO Auto-generated constructor stub
+	}
 
 	public HoloxoDataCorrectionRule(XLSMetadataRuleVO ruleVO) {
 		super(ruleVO);

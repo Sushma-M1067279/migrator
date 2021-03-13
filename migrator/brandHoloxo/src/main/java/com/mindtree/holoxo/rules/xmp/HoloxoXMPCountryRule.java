@@ -5,6 +5,10 @@ import com.mindtree.utils.constants.MigratorConstants;
 import com.mindtree.utils.service.AbstractXMPMetadataRule;
 
 public class HoloxoXMPCountryRule extends AbstractXMPMetadataRule {
+	
+	public HoloxoXMPCountryRule() {
+		// TODO Auto-generated constructor stub
+	}
 
 	public HoloxoXMPCountryRule(XMPMetadataRuleVO ruleVO) {
 		super(ruleVO);

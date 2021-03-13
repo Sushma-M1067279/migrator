@@ -20,8 +20,10 @@ import com.mindtree.bluenoid.rules.BluenoidProgramSubfolderMetadataRule;
 import com.mindtree.models.dto.BrandMasterMappingDto;
 import com.mindtree.models.vo.DriveBasedMetadataRuleVO;
 import com.mindtree.models.vo.ExtensionFilterVO;
-import com.mindtree.transformer.service.MigratorServiceException;
-import com.mindtree.utils.business.IMigratorBusiness;
+import com.mindtree.core.service.IFilter;
+import com.mindtree.core.service.IMigratorBusiness;
+import com.mindtree.core.service.IRule;
+import com.mindtree.core.service.MigratorServiceException;
 import com.mindtree.utils.constants.MigratorConstants;
 import com.mindtree.utils.service.FilterEvaluator;
 import com.mindtree.utils.service.RulesEvaluator;
@@ -33,6 +35,8 @@ import com.mindtree.utils.service.RulesEvaluator;
 public class BluenoidBusinessImpl implements IMigratorBusiness {
 	
 	static final Logger LOGGER = LoggerFactory.getLogger(BluenoidBusinessImpl.class);
+	List<IFilter> filters;
+	List<IRule> rules;
 
 
 	/**
@@ -82,8 +86,12 @@ public class BluenoidBusinessImpl implements IMigratorBusiness {
 		 */
 		LOGGER.info("Applying bluenoid specific filters : "+s3Asset.getKey());
 		FilterEvaluator filterEvaluator = new FilterEvaluator();
-		filterEvaluator.addFilter(new BluenoidEmptyAssetFilter(filterVO))
-				.addFilter(new BluenoidExtensionBasedFilter(filterVO)).addFilter(new BluenoidFileTypeFilter(filterVO));
+		for (int i = 0; i < filters.size(); i++) {
+			IFilter filter = filters.get(i);
+			filter.setVO(filterVO);
+			filterEvaluator.addFilter(filter);
+		}
+		
 		eligibleToMigrate = filterEvaluator.evaluateAllFilters();
 
 		/**
@@ -97,12 +105,13 @@ public class BluenoidBusinessImpl implements IMigratorBusiness {
 					destinationAssetPath, missingAssets, migratedAssetsMap, s3Asset);
 
 			RulesEvaluator rulesEvaluator = new RulesEvaluator();
-			rulesEvaluator.addRule(new BluenoidMetadataMappingRule(ruleVO))
-					.addRule(new BluenoidProgramSubfolderMetadataRule(ruleVO))
-					.addRule(new BluenoidProgramFolderMetadataRule(ruleVO))
-					.addRule(new BluenoidDefaultMetadataRule(ruleVO))
-					.addRule(new BluenoidFolderMappingRule(ruleVO));
-
+			
+			for (int i = 0; i < rules.size(); i++) {
+				IRule rule = rules.get(i);
+				rule.setVO(ruleVO);
+				rulesEvaluator.addRule(rule);
+			}
+			
 			rulesEvaluator.evaluateAllRules();
 
 			outputMap.put(MigratorConstants.OUTPUT_ASSET_METADATA_MAP, ruleVO.assetMetadataMap);
@@ -115,4 +124,17 @@ public class BluenoidBusinessImpl implements IMigratorBusiness {
 		return outputMap;
 	}
 
+	/**
+	 * @param filters the filters to set
+	 */
+	public void setFilters(List<IFilter> filters) {
+		this.filters = filters;
+	}
+
+	/**
+	 * @param rules the rules to set
+	 */
+	public void setRules(List<IRule> rules) {
+		this.rules = rules;
+	}
 }

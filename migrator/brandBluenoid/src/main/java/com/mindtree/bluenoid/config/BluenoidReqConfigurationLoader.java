@@ -19,8 +19,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.amazonaws.services.s3.AmazonS3;
-import com.mindtree.transformer.service.AppContext;
-import com.mindtree.transformer.service.MigratorServiceException;
+import com.mindtree.core.service.AppContext;
+import com.mindtree.core.service.MigratorServiceException;
 import com.mindtree.utils.constants.MigratorConstants;
 import com.mindtree.utils.helper.BusinessRulesUtil;
 import com.mindtree.utils.helper.MigrationUtil;

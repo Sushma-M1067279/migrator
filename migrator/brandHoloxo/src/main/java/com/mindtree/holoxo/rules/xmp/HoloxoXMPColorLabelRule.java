@@ -8,6 +8,10 @@ import com.mindtree.utils.helper.BusinessRulesUtil;
 import com.mindtree.utils.service.AbstractXMPMetadataRule;
 
 public class HoloxoXMPColorLabelRule extends AbstractXMPMetadataRule {
+	
+	public HoloxoXMPColorLabelRule() {
+		// TODO Auto-generated constructor stub
+	}
 
 	public HoloxoXMPColorLabelRule(XMPMetadataRuleVO ruleVO) {
 		super(ruleVO);

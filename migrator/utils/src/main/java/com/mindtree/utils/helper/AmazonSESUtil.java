@@ -34,8 +34,8 @@ import com.amazonaws.services.simpleemail.model.Message;
 import com.amazonaws.services.simpleemail.model.RawMessage;
 import com.amazonaws.services.simpleemail.model.SendEmailRequest;
 import com.amazonaws.services.simpleemail.model.SendRawEmailRequest;
-import com.mindtree.transformer.service.AppContext;
-import com.mindtree.transformer.service.MigratorServiceException;
+import com.mindtree.core.service.AppContext;
+import com.mindtree.core.service.MigratorServiceException;
 import com.mindtree.utils.constants.MigratorConstants;
 
 public class AmazonSESUtil {

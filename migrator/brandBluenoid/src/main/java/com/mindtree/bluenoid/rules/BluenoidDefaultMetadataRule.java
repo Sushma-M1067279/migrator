@@ -1,11 +1,14 @@
 package com.mindtree.bluenoid.rules;
 
 import com.mindtree.models.vo.DriveBasedMetadataRuleVO;
-import com.mindtree.transformer.service.AppContext;
+import com.mindtree.core.service.AppContext;
 import com.mindtree.utils.constants.MigratorConstants;
 import com.mindtree.utils.service.AbstractDriveBasedRule;
 
 public class BluenoidDefaultMetadataRule extends AbstractDriveBasedRule {
+	
+	public BluenoidDefaultMetadataRule() {
+	}
 
 	public BluenoidDefaultMetadataRule(DriveBasedMetadataRuleVO ruleVO) {
 		super(ruleVO);

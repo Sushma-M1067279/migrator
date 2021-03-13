@@ -10,9 +10,9 @@ import java.util.Date;
 import java.util.Map;
 import java.util.Properties;
 
-import com.mindtree.transformer.service.AppContext;
-import com.mindtree.transformer.service.IStorage;
-import com.mindtree.transformer.service.AppContext.AppVariables;
+import com.mindtree.core.service.AppContext;
+import com.mindtree.core.service.IStorage;
+import com.mindtree.core.service.AppContext.AppVariables;
 
 /**
  * @author AdobeDay2

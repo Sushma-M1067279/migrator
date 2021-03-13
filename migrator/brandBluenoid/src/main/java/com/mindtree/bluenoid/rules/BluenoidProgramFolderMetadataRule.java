@@ -6,6 +6,10 @@ import com.mindtree.models.vo.DriveBasedMetadataRuleVO;
 import com.mindtree.utils.service.AbstractDriveBasedRule;
 
 public class BluenoidProgramFolderMetadataRule extends AbstractDriveBasedRule {
+	
+	public BluenoidProgramFolderMetadataRule() {
+		
+	}
 
 	public BluenoidProgramFolderMetadataRule(DriveBasedMetadataRuleVO ruleVO) {
 		super(ruleVO);

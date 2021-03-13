@@ -20,7 +20,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.http.client.SimpleClientHttpRequestFactory;
 import org.springframework.web.client.RestTemplate;
 
-import com.mindtree.transformer.service.MigratorServiceException;
+import com.mindtree.core.service.MigratorServiceException;
 import com.mindtree.utils.constants.MigratorConstants;
 import com.mindtree.validator.model.AemQueryBuilderResponse;
 import com.mindtree.validator.model.AemRequest;

@@ -7,6 +7,10 @@ import com.mindtree.models.vo.DriveBasedMetadataRuleVO;
 import com.mindtree.utils.service.AbstractDriveBasedRule;
 
 public class BluenoidMetadataMappingRule extends AbstractDriveBasedRule {
+	
+	public BluenoidMetadataMappingRule() {
+		
+	}
 
 	public BluenoidMetadataMappingRule(DriveBasedMetadataRuleVO ruleVO) {
 		super(ruleVO);

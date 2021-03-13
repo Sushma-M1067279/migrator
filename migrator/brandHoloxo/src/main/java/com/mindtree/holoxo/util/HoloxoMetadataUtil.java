@@ -12,8 +12,8 @@ import org.slf4j.LoggerFactory;
 
 import com.mindtree.holoxo.config.HoloxoReqConfigurationLoader;
 import com.mindtree.models.dto.BrandMasterMappingDto;
-import com.mindtree.transformer.service.AppContext;
-import com.mindtree.transformer.service.MigratorServiceException;
+import com.mindtree.core.service.AppContext;
+import com.mindtree.core.service.MigratorServiceException;
 import com.mindtree.utils.constants.MigratorConstants;
 
 /**

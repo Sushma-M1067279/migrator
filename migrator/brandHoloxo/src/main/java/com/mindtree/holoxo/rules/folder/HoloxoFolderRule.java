@@ -2,11 +2,15 @@ package com.mindtree.holoxo.rules.folder;
 
 import com.mindtree.holoxo.util.HoloxoMetadataUtil;
 import com.mindtree.models.vo.FolderRuleVO;
-import com.mindtree.transformer.service.MigratorServiceException;
+import com.mindtree.core.service.MigratorServiceException;
 import com.mindtree.utils.constants.MigratorConstants;
 import com.mindtree.utils.service.AbstractFolderRule;
 
 public class HoloxoFolderRule extends AbstractFolderRule {
+	
+	public HoloxoFolderRule() {
+		// TODO Auto-generated constructor stub
+	}
 
 	public HoloxoFolderRule(FolderRuleVO ruleVO) {
 		super(ruleVO);

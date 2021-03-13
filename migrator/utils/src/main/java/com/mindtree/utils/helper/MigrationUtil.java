@@ -17,7 +17,7 @@ import com.adobe.internal.xmp.impl.XMPIteratorImpl;
 import com.adobe.internal.xmp.properties.XMPPropertyInfo;
 import com.amazonaws.AmazonServiceException;
 import com.amazonaws.SdkClientException;
-import com.mindtree.transformer.service.MigratorServiceException;
+import com.mindtree.core.service.MigratorServiceException;
 import com.mindtree.utils.constants.MigratorConstants;
 
 public class MigrationUtil {

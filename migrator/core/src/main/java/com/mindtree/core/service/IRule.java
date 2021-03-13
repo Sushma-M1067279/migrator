@@ -1,5 +1,6 @@
-package com.mindtree.utils.service;
+package com.mindtree.core.service;
 
+import com.mindtree.models.vo.RuleVO;
 
 /**
  * An interface to standardize the way rules are written.
@@ -10,5 +11,7 @@ package com.mindtree.utils.service;
 public interface IRule {
 	
 	public void apply();
+	
+	public void setVO(RuleVO ruleVO);
 
 }

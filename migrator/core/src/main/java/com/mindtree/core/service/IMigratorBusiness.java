@@ -1,9 +1,9 @@
-package com.mindtree.utils.business;
+package com.mindtree.core.service;
 
+import java.util.List;
 import java.util.Map;
 
 import com.mindtree.models.dto.BrandMasterMappingDto;
-import com.mindtree.transformer.service.MigratorServiceException;
 
 /**
  * @author M1032046
@@ -29,5 +29,8 @@ public interface IMigratorBusiness {
 	 */
 	Map<String, Object> applyBrandSpecificRules(Map<String, BrandMasterMappingDto> masterMetadataMap, Map.Entry<String, Long> s3Asset,
 			String brand, String brandPrefix) throws MigratorServiceException;
+	
+	void setFilters(List<IFilter> filters);
+	void setRules(List<IRule> rules);
 
 }

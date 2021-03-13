@@ -4,13 +4,16 @@ import java.util.Properties;
 
 import com.mindtree.bluenoid.util.FilterUtil;
 import com.mindtree.models.vo.ExtensionFilterVO;
-import com.mindtree.transformer.service.AppContext;
-import com.mindtree.transformer.service.MigratorServiceException;
+import com.mindtree.core.service.AppContext;
+import com.mindtree.core.service.MigratorServiceException;
 import com.mindtree.utils.constants.MigratorConstants;
 import com.mindtree.utils.helper.MigrationUtil;
 import com.mindtree.utils.service.AbstractFilter;
 
 public class BluenoidFileTypeFilter extends AbstractFilter {
+	
+	public BluenoidFileTypeFilter() {
+	}
 
 	public BluenoidFileTypeFilter(ExtensionFilterVO filterVO) {
 		super(filterVO);

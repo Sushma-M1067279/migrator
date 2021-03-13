@@ -8,6 +8,10 @@ import com.mindtree.utils.constants.MigratorConstants;
 import com.mindtree.utils.service.AbstractXLSMetadataRule;
 
 public class HoloxoAssetTypeRule extends AbstractXLSMetadataRule {
+	
+	public HoloxoAssetTypeRule() {
+		// TODO Auto-generated constructor stub
+	}
 
 	public HoloxoAssetTypeRule(XLSMetadataRuleVO ruleVO) {
 		super(ruleVO);

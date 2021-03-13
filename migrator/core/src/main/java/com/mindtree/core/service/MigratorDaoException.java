@@ -1,4 +1,4 @@
-package com.mindtree.utils.exception;
+package com.mindtree.core.service;
 
 public class MigratorDaoException extends Exception {
 

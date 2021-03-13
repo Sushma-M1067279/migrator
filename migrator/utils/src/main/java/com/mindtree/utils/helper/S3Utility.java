@@ -11,7 +11,7 @@ import com.amazonaws.services.s3.AmazonS3;
 import com.amazonaws.services.s3.model.ListObjectsRequest;
 import com.amazonaws.services.s3.model.ObjectListing;
 import com.amazonaws.services.s3.model.S3ObjectSummary;
-import com.mindtree.transformer.service.MigratorServiceException;
+import com.mindtree.core.service.MigratorServiceException;
 
 /**
  * @author M1032046

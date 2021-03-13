@@ -7,8 +7,8 @@ import com.amazonaws.services.lambda.runtime.Context;
 import com.amazonaws.services.lambda.runtime.RequestHandler;
 import com.mindtree.transformer.TransformerApp;
 import com.mindtree.transformer.factory.ApplicationFactory;
-import com.mindtree.transformer.service.AppContext;
-import com.mindtree.transformer.service.ITransformer;
+import com.mindtree.core.service.AppContext;
+import com.mindtree.core.service.ITransformer;
 
 public class AWSTransformationHandler implements RequestHandler<TransformerRequest, TransformerResponse> {
 

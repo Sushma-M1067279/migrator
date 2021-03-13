@@ -17,12 +17,12 @@ import org.slf4j.LoggerFactory;
 import com.amazonaws.services.s3.AmazonS3;
 import com.mindtree.holoxo.util.HoloxoMetadataUtil;
 import com.mindtree.models.dto.BrandMasterMappingDto;
-import com.mindtree.transformer.factory.MigratorBusinessFactory;
-import com.mindtree.transformer.service.AppContext;
-import com.mindtree.transformer.service.IDataFileReader;
-import com.mindtree.transformer.service.ITransformer;
-import com.mindtree.transformer.service.MigratorServiceException;
-import com.mindtree.utils.business.IMigratorBusiness;
+import com.mindtree.transformer.factory.ApplicationFactory;
+import com.mindtree.core.service.AppContext;
+import com.mindtree.core.service.IDataFileReader;
+import com.mindtree.core.service.IMigratorBusiness;
+import com.mindtree.core.service.ITransformer;
+import com.mindtree.core.service.MigratorServiceException;
 import com.mindtree.utils.constants.MigratorConstants;
 import com.mindtree.utils.helper.MasterMetadataMapReader;
 import com.mindtree.utils.helper.MigrationReportUtil;
@@ -85,8 +85,8 @@ public class DAMBasedTransformer extends AbstractTransformer {
 
 			Properties prop = AppContext.getAppConfig();
 
-			String masterBrandMappingFileName = AppContext.getAppConfig().getProperty("migrator.asset.masterBrandMappingFileName");
-			String mastetToBrandMappingSheetName = AppContext.getAppConfig().getProperty("migrator.asset.mastetToBrandMappingSheetName");
+			String masterBrandMappingFileName = prop.getProperty("migrator.asset.masterBrandMappingFileName");
+			String mastetToBrandMappingSheetName = prop.getProperty("migrator.asset.mastetToBrandMappingSheetName");
 			/**
 			 * Read brand specific properties.
 			 */
@@ -103,7 +103,7 @@ public class DAMBasedTransformer extends AbstractTransformer {
 			brand = prop.getProperty(brandPrefix + "" + MigratorConstants.BRAND);
 			folderPath = prop.getProperty(brandPrefix + "" + MigratorConstants.XMP_TRANSFORMATION_PATH);
 
-			migratorBusiness = MigratorBusinessFactory.getMigratorBusiness(this.brand);
+			migratorBusiness = ApplicationFactory.getMigratorBusiness(brandAbbreviation);
 
 			// Read master metadata mapping sheet
 			Map<String, BrandMasterMappingDto> masterMetadataMap = MasterMetadataMapReader.getBrandMasterMapping(
@@ -125,36 +125,36 @@ public class DAMBasedTransformer extends AbstractTransformer {
 			}
 
 			for (String[] currentRow : excelFileReader.readRows(processAssetsCount)) {
-				if (true) {
-					++count;
-					// first column check
-					if (currentRow[0].equalsIgnoreCase(MigratorConstants.COLUMN_FILE_NAME)) {
-						int headerIndex = 0;
-						// loop thru first row prepare header map
-						for (String header : currentRow) {
-							if (header != null && !header.isEmpty()) {
-								csvHeaderMap.put(header, headerIndex++);
-							}
-
-						}
-						// subsequent rows
-					} else {
-						if (lastProcessedAssetByInterruption != null
-								&& !lastProcessedAssetByInterruption.equalsIgnoreCase("-1")) {
-							// resume transformation process
-							needsMigration = resumeLastTransformation(masterMetadataMap, assetMetadataMap,
-									assetKindMap, currentRow);
-						} else {
-							// start transformation process
-							needsMigration = startNewTransformation(masterMetadataMap, assetMetadataMap, assetKindMap,
-									excelFileReader, count, currentRow);
+//				if (true) {
+				++count;
+				// first column check
+				if (currentRow[0].equalsIgnoreCase(MigratorConstants.COLUMN_FILE_NAME)) {
+					int headerIndex = 0;
+					// loop thru first row prepare header map
+					for (String header : currentRow) {
+						if (header != null && !header.isEmpty()) {
+							csvHeaderMap.put(header, headerIndex++);
 						}
 
 					}
+					// subsequent rows
 				} else {
-					MigrationReportUtil.updateLastProcessedAsset(assetIdBeingProcessed);
-					break;
+					if (lastProcessedAssetByInterruption != null
+							&& !lastProcessedAssetByInterruption.equalsIgnoreCase("-1")) {
+						// resume transformation process
+						needsMigration = resumeLastTransformation(masterMetadataMap, assetMetadataMap,
+								assetKindMap, currentRow);
+					} else {
+						// start transformation process
+						needsMigration = startNewTransformation(masterMetadataMap, assetMetadataMap, assetKindMap,
+								excelFileReader, count, currentRow);
+					}
 				}
+
+//				} else {
+//					MigrationReportUtil.updateLastProcessedAsset(assetIdBeingProcessed);
+//					break;
+//				}
 			}
 			// create migration report
 			MigrationReportUtil.createSummaryReport( brandPrefix, migratedAssetsMap, nonMigratedAssetsMap);
@@ -306,7 +306,7 @@ public class DAMBasedTransformer extends AbstractTransformer {
 	 * @param xmpMap
 	 * @param exportFlowFlag
 	 */
-	public Map<String, String> cleanUpXMPMapAndApplyRules(Map<String, BrandMasterMappingDto> masterMetadataMap,
+	private Map<String, String> cleanUpXMPMapAndApplyRules(Map<String, BrandMasterMappingDto> masterMetadataMap,
 			Map<String, String> assetMetadataMapFromXMP, Map<String, String> xmpMap, String exportFlowFlag) {
 
 		for (Map.Entry<String, String> xmpMetadata : xmpMap.entrySet()) {

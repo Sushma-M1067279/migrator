@@ -27,8 +27,8 @@ import org.slf4j.LoggerFactory;
 import org.springframework.http.ResponseEntity;
 
 import com.amazonaws.services.s3.AmazonS3;
-import com.mindtree.transformer.service.AppContext;
-import com.mindtree.transformer.service.MigratorServiceException;
+import com.mindtree.core.service.AppContext;
+import com.mindtree.core.service.MigratorServiceException;
 import com.mindtree.utils.constants.MigratorConstants;
 import com.mindtree.utils.helper.AmazonSESUtil;
 import com.mindtree.utils.helper.ReadExcel;

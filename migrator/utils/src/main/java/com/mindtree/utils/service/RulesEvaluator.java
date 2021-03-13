@@ -6,6 +6,8 @@ import java.util.List;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.mindtree.core.service.IRule;
+
 public class RulesEvaluator {
 	
 	protected final static Logger LOGGER = LoggerFactory.getLogger(RulesEvaluator.class);

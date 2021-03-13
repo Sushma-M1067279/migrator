@@ -55,9 +55,9 @@ import com.amazonaws.services.s3.model.PutObjectRequest;
 import com.amazonaws.services.s3.model.PutObjectResult;
 import com.amazonaws.services.s3.model.S3Object;
 import com.amazonaws.services.s3.model.S3ObjectInputStream;
-import com.mindtree.transformer.service.AppContext;
-import com.mindtree.transformer.service.IStorage;
-import com.mindtree.transformer.service.MigratorServiceException;
+import com.mindtree.core.service.AppContext;
+import com.mindtree.core.service.IStorage;
+import com.mindtree.core.service.MigratorServiceException;
 import com.mindtree.utils.constants.MigratorConstants;
 
 /**
@@ -406,9 +406,9 @@ public class MigrationReportUtil {
 
 	public static String preparePathForFolderCreator(String path, Map<String, Map<String, String>> pathsMap) {
 		Pattern pt = Pattern.compile("[^a-zA-Z0-9._/\\p{L}]");
-		String sep = ""+AppContext.getStorage().fileSeparator();
+		String sep = "/"; 
 
-		String fileName = AppContext.getStorage().getFileName(path);
+		String fileName = path.substring(path.lastIndexOf(sep)); //AppContext.getStorage().getFileName(path);
 		String updatedFileName = replaceSpecialCharacters(pt, fileName, MigratorConstants.FILE_NAME);
 
 		path = path.substring(0, path.lastIndexOf(sep));

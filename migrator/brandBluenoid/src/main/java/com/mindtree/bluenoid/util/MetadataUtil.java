@@ -6,7 +6,7 @@ import java.util.Map;
 
 import com.mindtree.bluenoid.config.BluenoidReqConfigurationLoader;
 import com.mindtree.models.dto.BrandMasterMappingDto;
-import com.mindtree.transformer.service.AppContext;
+import com.mindtree.core.service.AppContext;
 import com.mindtree.utils.constants.MigratorConstants;
 import com.mindtree.utils.helper.BusinessRulesUtil;
 
@@ -184,7 +184,8 @@ public class MetadataUtil {
 	private static void updateAbsTargetPath(Map<String, String> assetMetadataMap, String assetMainFolderName,
 			String subPath, String brand) {
 		String aemTargetFolder = BluenoidReqConfigurationLoader.folderMappingMap.get(assetMainFolderName.toLowerCase());
-		String assetTargetPath = brand.concat(fileSep).concat(aemTargetFolder).concat(fileSep).concat(subPath);
+		String subPath1 = subPath.replace('\\', '/');
+		String assetTargetPath = brand.concat("/").concat(aemTargetFolder).concat("/").concat(subPath1);
 
 		assetMetadataMap.put(MigratorConstants.ABS_TARGET_PATH, assetTargetPath);
 		BusinessRulesUtil.absTargetPathsSet.add(assetTargetPath.toLowerCase());

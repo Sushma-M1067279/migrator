@@ -1,6 +1,6 @@
 package com.mindtree.validator.service;
 
-import com.mindtree.transformer.service.MigratorServiceException;
+import com.mindtree.core.service.MigratorServiceException;
 import com.mindtree.validator.model.AemQueryBuilderResponse;
 
 

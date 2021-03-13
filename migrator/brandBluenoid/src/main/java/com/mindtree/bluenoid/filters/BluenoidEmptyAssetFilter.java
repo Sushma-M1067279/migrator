@@ -4,13 +4,16 @@ import java.util.Properties;
 
 import com.mindtree.bluenoid.util.FilterUtil;
 import com.mindtree.models.vo.ExtensionFilterVO;
-import com.mindtree.transformer.service.AppContext;
-import com.mindtree.transformer.service.MigratorServiceException;
+import com.mindtree.core.service.AppContext;
+import com.mindtree.core.service.MigratorServiceException;
 import com.mindtree.utils.constants.MigratorConstants;
 import com.mindtree.utils.service.AbstractFilter;
 
 public class BluenoidEmptyAssetFilter extends AbstractFilter {
 
+	public BluenoidEmptyAssetFilter() {
+	}
+	
 	public BluenoidEmptyAssetFilter(ExtensionFilterVO filterVO) {
 		super(filterVO);
 	}

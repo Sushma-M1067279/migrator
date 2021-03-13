@@ -3,8 +3,8 @@
  */
 package com.mindtree.transformer.service.impl;
 
-import com.mindtree.transformer.service.IStorage;
-import com.mindtree.transformer.service.ITransformer;
+import com.mindtree.core.service.IStorage;
+import com.mindtree.core.service.ITransformer;
 
 /**
  * @author AdobeDay2

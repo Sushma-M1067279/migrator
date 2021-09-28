@@ -22,14 +22,16 @@ public class AppContext {
 		public final String storageSecret;
 		public final String storageType;
 		public final String storageAccountName;
+		public final String brandPrefix;
 
-		AppVariables(String v1, String v2, String v3, String v4, String v5, String v6){
+		AppVariables(String v1, String v2, String v3, String v4, String v5, String v6, String v7){
 			this.bucketName = v1;
 			this.configFolder = v2;
 			this.storageKey = v3;
 			this.storageSecret = v4;
 			this.storageType = v5;
 			this.storageAccountName = v6;
+			this.brandPrefix = v7;
 		}
 	}
 	
@@ -84,13 +86,13 @@ public class AppContext {
 	/**
 	 * @return the config
 	 */
-	public static boolean initializeConfig() {
+	public static boolean initializeConfig(String[] vars) {
 
-		return readSystemVariables();
+		return readSystemVariables(vars);
 
 	}
 
-	private static boolean readSystemVariables() {
+	private static boolean readSystemVariables(String[] vars) {
 
 		LOGGER.info("Reading system variables");
 
@@ -109,16 +111,9 @@ public class AppContext {
 				String storageAcName = (null != System.getenv("storage_account_name"))?
 						System.getenv("storage_account_name"):System.getProperty("storage_account_name");
 			
-//				if (storageType == null) { 
-//					storageType = "local"; 
-//				}
 				
-//				if (configBucketName == null || configFolder == null || awsKey == null || awsSecret == null ) {
-//					LOGGER.error("Unable to find environment variables");
-//					return false;
-//				}
 				appVariables = new AppVariables(configBucketName, configFolder, awsKey, 
-						awsSecret, storageType, storageAcName);
+						awsSecret, storageType, storageAcName, vars[0]);
 			}
 		} catch (Exception e) {
 			LOGGER.error("Unable to find environment variables ", e);

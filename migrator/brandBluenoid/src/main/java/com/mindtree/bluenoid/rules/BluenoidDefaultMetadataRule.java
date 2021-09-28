@@ -22,13 +22,14 @@ public class BluenoidDefaultMetadataRule extends AbstractDriveBasedRule {
 		
 		String assetPath = ruleVO.s3Asset.getKey().trim();
 		String fileName = AppContext.getStorage().getFileName(assetPath);
+		
 		ruleVO.assetMetadataMap.put(MigratorConstants.EXCEL_COLUMN_DRIVE_PATH, assetPath);
 		if (fileName.startsWith(MigratorConstants.SPECIAL_CHARACTER_SINGLE_HASH)) {
 			fileName = fileName.replaceFirst("#", "");
 		}
 		ruleVO.assetMetadataMap.put(MigratorConstants.DC_TITLE, fileName);
 		ruleVO.assetMetadataMap.put(MigratorConstants.COLUMN_FILE_NAME, fileName);
-		ruleVO.assetMetadataMap.put(MigratorConstants.BRAND, MigratorConstants.BRAND_BLUENOID);
+		ruleVO.assetMetadataMap.put(MigratorConstants.BRAND, this.brandName);
 
 		if (!ruleVO.migratedAssetsMap.containsKey(assetPath)) {
 			ruleVO.missingAssets.add(assetPath);

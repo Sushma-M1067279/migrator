@@ -20,8 +20,10 @@ public class TransformerApp {
 	public AppVariables appVariables;
 	private IStorage appStorage;
 	
-	public boolean init() {
-		initSuccess = AppContext.initializeConfig();
+	private String summary;
+	
+	public boolean init(String[] vars) {
+		initSuccess = AppContext.initializeConfig(vars);
 		if (!initSuccess) {
 			LOGGER.error("TransformerApp : init : Errors while initializing application.");
 			return false;
@@ -62,7 +64,16 @@ public class TransformerApp {
 		
 		transformer.setStorage(appStorage);
 		
-		return transformer.transform( brandCode, instanceNumber);
+		boolean result = transformer.transform( brandCode, instanceNumber);
 
+		if(result) { 
+			summary = transformer.getSummary(); 
+		}
+		
+		return result;
+	}
+	
+	public String getSummary() {
+		return summary;
 	}
 }

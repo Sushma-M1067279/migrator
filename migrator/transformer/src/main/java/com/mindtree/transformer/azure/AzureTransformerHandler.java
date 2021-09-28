@@ -37,26 +37,29 @@ public class AzureTransformerHandler {
 
 		TransformerApp transformerApp = new TransformerApp();
 		boolean isSuccess = false;
+		String brandCode=null;
+		String transformationType=null;
+		String instanceNumber=null;
 		
-		if(transformerApp.init()) {
-			LOGGER.error("AzureTransformerHandler : Errrors while initiating the application.");
 			if (params != null && params.size() > 0) {
 
-				String brandCode = params.get("brandcode");
-				String transformationType = params.get("transformationtype");
-				String instanceNumber = params.get("instance");
+			brandCode = params.get("brandcode");
+			transformationType = params.get("transformationtype");
+			instanceNumber = params.get("instance");
 				
-				isSuccess = transformerApp.execute(transformationType, brandCode, instanceNumber);
+		}
 
-			}
+		if(transformerApp.init(new String[] {brandCode, transformationType, instanceNumber})) {
+			LOGGER.error("AzureTransformerHandler : Errrors while initiating the application.");
 			
+			isSuccess = transformerApp.execute(transformationType, brandCode, instanceNumber);			
 		}
 
 
         if (!isSuccess) {
             return request.createResponseBuilder(HttpStatus.BAD_REQUEST).body("XXXXXXXXX Errors during the execution. XXXXXXXXX").build();
         } else {
-            return request.createResponseBuilder(HttpStatus.OK).body("Congratulations!! Completed successfully.").build();
+            return request.createResponseBuilder(HttpStatus.OK).body(transformerApp.getSummary()).build();
         }
     }
 

@@ -36,7 +36,7 @@ public class ValidatorMain {
 
 	public static void main(String[] args) {
 		LOG.debug("Valiadator app is starting..");
-		boolean initSuccess = AppContext.initializeConfig();
+		boolean initSuccess = AppContext.initializeConfig(args);
 		Properties prop = null;
 		prop = AppContext.getAppConfig();
 		if (args != null && args.length > 0) {

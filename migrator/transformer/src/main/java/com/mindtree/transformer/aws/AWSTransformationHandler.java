@@ -20,7 +20,8 @@ public class AWSTransformationHandler implements RequestHandler<TransformerReque
 		
 		TransformerApp transformerApp = new TransformerApp();
 		
-		if(! transformerApp.init()) {
+		if(! transformerApp.init(new String[]{request.getSourceType(), request.getBrandCode(), 
+									request.getInstanceNumber()})) {
 			LOGGER.error("Couldn't find your transformer. Please check transformer.properties");
 			return new TransformerResponse(false);
 		}

@@ -53,8 +53,6 @@ public class DAMBasedTransformer extends AbstractTransformer {
 	static final Logger LOGGER = LoggerFactory.getLogger(DAMBasedTransformer.class);
 //	private static final Logger LOGGER_UTIL = LoggerFactory.getLogger(StopWatchUtil.class);
 
-	private Map<String, String> migratedAssetsMap = new HashMap<String, String>();
-	private Map<String, String> nonMigratedAssetsMap = new HashMap<String, String>();
 	private List<Map<String, String>> finalAssetMetadataMapList = new ArrayList<Map<String, String>>();
 	private Set<String> finalAssetMetadataMapKeySet = new HashSet<String>();
 	private String migrationAssetId;

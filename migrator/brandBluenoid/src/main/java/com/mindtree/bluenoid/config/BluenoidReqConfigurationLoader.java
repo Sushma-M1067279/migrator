@@ -58,7 +58,7 @@ public class BluenoidReqConfigurationLoader {
 
 			LOGGER.info("BluenoidReqConfigurationLoader : Loading static contents : Start..................");
 			prop = AppContext.getAppConfig();
-			brandAbbreviation ="BN";
+			brandAbbreviation = AppContext.getAppVariables().brandPrefix;
 			StringBuilder brandPrefix = MigrationUtil.prepareBrandPrefix(brandAbbreviation);
 			String brandConfigFile = prop.getProperty(brandPrefix + ""
 					+ MigratorConstants.BRAND_REQ_CONFIGURATION_FILENAME);

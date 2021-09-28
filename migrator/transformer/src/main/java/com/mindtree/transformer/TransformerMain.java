@@ -47,7 +47,7 @@ public class TransformerMain {
 
 		TransformerApp transformerApp = new TransformerApp();
 		
-		if(! transformerApp.init()) {
+		if(! transformerApp.init(args)) {
 			LOGGER.error("TransformMain : main : Errrors while initiating the application.");
 			return;
 		}
@@ -58,7 +58,13 @@ public class TransformerMain {
 			String transformationType = args[1];
 			String instanceNumber = args[2];
 			
-			transformerApp.execute(transformationType, brandCode, instanceNumber);
+			boolean result = transformerApp.execute(transformationType, brandCode, instanceNumber);
+			
+			if(result) {
+				LOGGER.info(transformerApp.getSummary());
+			} else {
+				LOGGER.error("Something went wrong. Redo migration.");
+			}
 
 		}
 

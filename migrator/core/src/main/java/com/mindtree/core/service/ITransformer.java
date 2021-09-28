@@ -16,5 +16,7 @@ public interface ITransformer {
 	 */
 	public boolean transform(/*AbstractApplicationContext context,*/
 			String brandAbbreviation, String instanceNumber);
+	
+	public String getSummary();
 
 }

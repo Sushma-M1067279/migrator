@@ -23,7 +23,7 @@ public class BluenoidFolderMappingRule extends AbstractDriveBasedRule {
 		 * Path Find out absTargetPath.
 		 */
 		MetadataUtil.applyFolderMappingRule(ruleVO.destinationAssetPath, ruleVO.assetMetadataMap,
-				MigratorConstants.BRAND_BLUENOID);
+				this.brandName);
 	}
 
 }

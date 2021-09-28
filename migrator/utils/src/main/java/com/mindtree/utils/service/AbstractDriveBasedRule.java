@@ -3,6 +3,7 @@ package com.mindtree.utils.service;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.mindtree.core.service.AppContext;
 import com.mindtree.core.service.IRule;
 import com.mindtree.models.vo.DriveBasedMetadataRuleVO;
 import com.mindtree.models.vo.ExtensionFilterVO;
@@ -11,6 +12,9 @@ import com.mindtree.models.vo.RuleVO;
 public abstract class AbstractDriveBasedRule implements IRule {
 
 	protected final static Logger LOGGER = LoggerFactory.getLogger(AbstractDriveBasedRule.class);
+	
+	protected String brandName = AppContext.getAppConfig().getProperty(
+			"migrator."+AppContext.getAppVariables().brandPrefix+".brand");
 
 	protected DriveBasedMetadataRuleVO ruleVO;
 	

@@ -1,5 +1,7 @@
 package com.mindtree.transformer.service.impl;
 
+import java.io.IOException;
+import java.io.StringWriter;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -7,7 +9,10 @@ import java.util.List;
 import java.util.Map;
 import java.util.Properties;
 import java.util.Set;
+import java.util.Map.Entry;
 
+import org.json.simple.JSONArray;
+import org.json.simple.JSONObject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -46,8 +51,6 @@ import com.mindtree.utils.helper.S3Utility;
  */
 public class DriveBasedTransformer extends AbstractTransformer {
 
-	private Map<String, String> migratedAssetsMap = new HashMap<String, String>();
-	private Map<String, String> nonMigratedAssetsMap = new HashMap<String, String>();
 	private List<Map<String, String>> assetMetadataMapList = new ArrayList<Map<String, String>>();
 	private Set<String> finalHeadersSet = new HashSet<String>();
 	private List<String> missingAssets = new ArrayList<>();
